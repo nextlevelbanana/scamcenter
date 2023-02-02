@@ -4,6 +4,7 @@ import { addButton } from "./addButton";
 import { addCredit } from "./addCredit";
 import { initializeGame } from "./initializeGame";
 import { black, red } from "./colors";
+import { addHand } from "./addHand";
 
 kaboom({
     background:[215,155,25]
@@ -12,6 +13,7 @@ kaboom({
 loadSound("titleBGM", "./assets/sound/Mr_Moneybags_Rag.mp3")
 loadSound("mainBGM", "./assets/sound/The_Grift.mp3")
 loadFont("duster", "./assets/duster.ttf")
+loadSprite("placeholder", "./assets/sprites/placeholder.png")
 
 const titleMusic = play("titleBGM", {
     loop: true,
@@ -27,11 +29,18 @@ scene("game", async () => {
         loop: true
     })
 
-    const {deck, bankBalance, hand, discard} = await initializeGame()
+    const {deck, bankBalance, discard} = await initializeGame()
     let currentBalance = bankBalance * -1;
 
     const infobox = add([
-        rect(300,300,20)
+        rect(width() - 200, 120, { radius: 32 }),
+        pos(margin, topMargin),
+        outline(2),
+    ])
+    
+    const infotext = infobox.add([
+        color(black),
+        text("", { size: 32}),
     ])
 
    const bankBalanceUI = add([
@@ -72,27 +81,27 @@ scene("game", async () => {
     pos(width() - 350, height() - 205)
    ])
 
-   hand.push(...(deck.splice(0,3)));
+   let [hand, handNames] = addHand([...(deck.splice(0,3))]);
 
-   add([
-       text(hand[0].name),
-       pos(margin, height() - 205),
-       color(black),
-       width(150)
-   ]);
-   add([
-       text(hand[1].name),
-       pos(margin + 200, height() - 205),
-       color(black),
-       width(150)
-   ]);
-   add([
-       text(hand[2].name),
-       pos(margin + 400, height() - 205),
-       color(black),
-       width(150)
-   ]);
+   onHover("hand", card => {
+        infotext.text = card.description
+    })  
+
+    onClick("hand", card => {
+        if (card.isSelected) {
+            card.isSelected = false;
+            card.scale = vec2(1)
+        } else {
+            hand.forEach(c => {
+                c.isSelected = false;
+                c.scale = vec2(1);  
+            })
+            card.isSelected = true;
+            card.scale = vec2(1.5);
+        }
+    })
 });
+
 
 //-----------------------------------------------------------------
 scene("title", () => {
@@ -119,12 +128,9 @@ scene("title", () => {
         } else {
             titleMusic.paused = true
             musicButton.text = "play music"
-
         }
     }
-
 })
-
 
 
 scene("credits", () => {

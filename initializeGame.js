@@ -11,6 +11,7 @@ export const initializeGame = async() => {
         let json = await res.json()
         for (i = 0; i < startingDeckComposition[category]; i++) {
             const selected = json[randi(startingDeckComposition[category])];
+            console.log(selected)
             selectedCards.push(selected);
         }
     }
