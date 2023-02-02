@@ -1,0 +1,22 @@
+[
+    {
+        "kind": "defer",
+        "name": "Loan Deferment",
+        "effect" : ["deferLoan", "2"]
+    },
+    {
+        "kind": "move",
+        "name": "Reallocate Suckers",
+        "effect" : "reallocate"
+    },
+    {
+        "kind": "hype",
+        "name": "Create Hype",
+        "effect": ["hype", "2"]
+    },
+    {
+        "kind": "crumble",
+        "name": "Rug Pull",
+        "effect": "crumble"
+    }
+]

@@ -1,0 +1,30 @@
+[
+    {
+        "name": "propup 1",
+        "description": "Lorem Ipsum dollar sit amet",
+        "affects": "curve",
+        "value": 1,
+        "firstRoundAvailable": 1
+    },
+    {
+        "name": "propup 2",
+        "description": "Lorem Ipsum dollar sit amet",
+        "affects": "suckers",
+        "value": 1,
+        "firstRoundAvailable": 1
+    },
+    {
+        "name": "propup 3",
+        "description": "Lorem Ipsum dollar sit amet",
+        "affects": "curve",
+        "value": 2,
+        "firstRoundAvailable": 1
+    },
+    {
+        "name": "propup 4",
+        "description": "Lorem Ipsum dollar sit amet",
+        "affects": "followers",
+        "value": 2,
+        "firstRoundAvailable": 1
+    }
+]

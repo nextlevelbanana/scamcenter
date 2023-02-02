@@ -1,0 +1,32 @@
+[
+    {
+        "name": "grift 1",
+        "curve": [3, 5, -4, -2],
+        "firstRoundAvailable": 1
+    },
+    {
+        "name": "grift 2",
+        "curve": [1, 7, -3, -4],
+        "firstRoundAvailable": 1
+    },
+    {
+        "name": "grift 3",
+        "curve": [1, 1, -8, -5],
+        "firstRoundAvailable": 1
+    },
+    {
+        "name": "grift 4",
+        "curve": [1, 9, -6, -3],
+        "firstRoundAvailable": 1
+    },
+    {
+        "name": "grift 5",
+        "curve": [3, 4, -1, -5],
+        "firstRoundAvailable": 1
+    },
+    {
+        "name": "grift 6",
+        "curve": [3, 4, -3, -4],
+        "firstRoundAvailable": 1
+    }
+]
