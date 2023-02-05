@@ -105,7 +105,6 @@ scene("game", async () => {
    ]);
 
    const updateBankBalanceUI = () => {
-    console.log(bankBalance)
     bankBalanceUI.text = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(bankBalance)
     bankBalanceUI.color = bankBalance > 0 ? Color.fromHex(black) : Color.fromHex(red)
    }
@@ -156,8 +155,6 @@ scene("game", async () => {
     }
 
     turn.onStateEnter("notif", () => {
-        console.log(turnNumber)
-        console.log(turnsInRound[roundNumber])
         if (turnNumber >= turnsInRound[roundNumber]) {
             checkForGameOver()
             roundNumber++

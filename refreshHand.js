@@ -7,15 +7,10 @@ export const refreshHand = () => {
         card.hidden = true;
     })
 
-    const currentDeck = get("deck");
+    const drawCard = (i) => {
+        const currentDeck = get("deck");
 
-    if (currentDeck.length < 3) {
-        //todo
-    }
-
-    else {
-        for (let i = 0; i < 3; i++) {
-            let currentCard;
+        let currentCard;
             do {
                 currentCard = choose(currentDeck);
             } while (!currentCard || !currentCard.is("deck"));
@@ -24,8 +19,34 @@ export const refreshHand = () => {
             currentCard.use("hand");
             currentCard.hidden = false;
             currentCard.pos = vec2(10 + 250*i,700) //todo
+    }
+
+    if (get("deck").length < 3) {
+
+        const remainder = get("deck").length
+        for(let i = 0; i < remainder; i++) {
+            drawCard(i)
+        }
+
+        get("discard").forEach(card => {
+            card.unuse("discard")
+            card.use("deck")
+        })
+
+        console.log(remainder)
+
+        for(let i = remainder; i < 3; i++) {
+            drawCard(i)
+       }
+    }
+
+    else {
+        for (let i = 0; i < 3; i++) {
+            drawCard(i)
         }
     }
+
+    
 
     onHover("hand", card => {
         const infotext = get("infobox")[0].get("infoText")[0]
