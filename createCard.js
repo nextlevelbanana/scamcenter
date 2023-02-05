@@ -11,7 +11,8 @@ export const createCard = (data, status) => {
         "card",
         status, //tag
         data.kind, //tag
-        sprite("placeholder"),
+        rect(200,200),
+        opacity(0),
         area()
         //todo: does it need an initial position?
     ])
@@ -62,5 +63,13 @@ export const createCard = (data, status) => {
         newCard.get("phaseUI")[0].hidden = true
     }
 
+    if(newCard.is("frauds")) {
+        newCard.add([
+            "fraudUI",
+            color(200, 178, 28),
+            text(data.amount),
+            pos(0,28)
+        ])
+    }
     return newCard
 }

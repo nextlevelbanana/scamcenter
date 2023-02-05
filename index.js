@@ -16,6 +16,7 @@ loadSound("mainBGM", "./assets/sound/The_Grift.mp3")
 loadSound("dealOne", "./assets/sound/deal_one.wav")
 loadSound("slotHandle", "./assets/sound/slot_handle.wav")
 loadSound("cashRegister", "./assets/sound/cash_register.wav")
+loadSound("nope", "./assets/sound/nope.wav")
 
 loadFont("duster", "./assets/duster.ttf")
 loadSprite("placeholder", "./assets/sprites/placeholder.png")
@@ -65,6 +66,32 @@ scene("game", async () => {
         text("", { size: 32}),
     ])
 
+    onHover("card", card => {
+        const infotext = get("infobox")[0].get("infoText")[0]
+        infotext.text = card.description
+        if (card.is("grifts")) {
+            infotext.text += `\nsucker curve:${card.curve.join("/")}`
+        }
+    })
+
+    onClick("card", card => {
+        if (turn.state !== "draw" || !card.is("hand")) {
+            return
+        }
+        console.log(card.id, card.name, card.isSelected)
+        if (card.isSelected) {
+            card.isSelected = false
+            card.scale = vec2(1)
+        } else {
+            get("hand").forEach(c => {
+                c.isSelected = false
+                c.scale = vec2(1)
+            })
+            card.isSelected = true
+            card.scale = vec2(1.5)
+        }
+    })
+
     const notifBox = add([
         rect(width()*.9, height()*.9, 32),
         color(Color.fromHex(cyan))
@@ -104,7 +131,10 @@ scene("game", async () => {
     pos(width()-200, topMargin)
    ]);
 
-   const updateBankBalanceUI = () => {
+   const updateBankBalanceUI = (value) => {
+    if (value) {
+        bankBalance += value
+    }
     bankBalanceUI.text = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(bankBalance)
     bankBalanceUI.color = bankBalance > 0 ? Color.fromHex(black) : Color.fromHex(red)
    }
@@ -155,7 +185,7 @@ scene("game", async () => {
     }
 
     turn.onStateEnter("notif", () => {
-        if (turnNumber >= turnsInRound[roundNumber]) {
+        if (turnNumber >= (turnsInRound[roundNumber] ?? 1)) {
             checkForGameOver()
             roundNumber++
             turnNumber = 0
@@ -178,22 +208,73 @@ scene("game", async () => {
 
     const confirmPlay = () => {
         const selected = get("hand").filter(c => c.isSelected)[0];
-        //todo: how to play propups and frauds, invalid plays, etc
-        playCard(selected);
-        play("dealOne").then(() => turn.enterState("play"))
+        playCard(selected)
     }
 
     const confirmPlayButton = addButton("play?", vec2(width()*.9, height()*.9), confirmPlay)
 
     const griftPhases = ["hype", "adoption", "suspicion", "busted"]
 
-    const playCard = card => {
+    const playGrift = card => {
         const i = get("inPlay").length
-        card.unuse("hand")
+        play("dealOne")
         card.use("inPlay")
+        card.pos = vec2(10 + 300*i, 400)
+        card.get("phaseUI")[0].hidden = true       
+    }
+
+    const playFraud = card => {
+        play("cashRegister").then(() => {
+            card.use("discard")
+            play("dealOne")
+            updateBankBalanceUI(card.amount)
+        })
+    }
+
+    const playPropup = card => {
+        const infoText = get("infobox")[0].get("infoText")[0]
+
+        const propuppable = get("inPlay")?.filter(c => c.is("grifts"))
+        if (!propuppable || !propuppable.length) {
+            play("nope")
+            infoText.text = "nothing to prop up!"
+            card.isSelected = false
+        } else {
+            infoText.text = "Prop up which grift?"
+            propuppable.forEach(card => {
+                const propuppable = card.add([
+                    "propuppable",
+                    rect(100,100),
+                    area(),
+                    color(Color.fromHex("0099cc"))
+                ])
+            })
+        }
+    }
+
+    onClick("propuppable", thing => {
+        console.log(thing)
+        //thing.parent = grift card
+    })
+
+    const playCard = card => {
+        if (card.is("grifts")) {
+            console.log("grift!")
+            playGrift(card)
+        } else if (card.is("frauds")) {
+            console.log("fraud!")
+            playFraud(card)
+        } else if (card.is("propups")) {
+            console.log("propup")
+            playPropup(card)
+        } else if (card.is("specials")) {
+            console.log("special")
+        }
         card.isSelected = false
-        card.pos = vec2(10 + 100*i, 500)
-        card.get("phaseUI")[0].hidden = true
+        card.scale = vec2(1)
+        if (card.is("grifts") || card.is("frauds")) {
+            turn.enterState("play")
+        }
     }
 
     turn.onStateUpdate("draw", () => {
@@ -230,14 +311,22 @@ scene("game", async () => {
         showSkipTurnButton(false)
     })
 
+    const discard = () => {
+        get("hand").forEach(card => {
+            card.unuse("hand");
+            if (!card.is("inPlay")) {
+                card.use("discard");
+                card.hidden = true;
+                card.pos = vec2(width()*1.2, height()*1.2)
+            }
+        })
+    }
+
     turn.onStateEnter("play", () => {
         confirmPlayButton.hidden = true;
 
-        get("hand").forEach(card => {
-            card.unuse("hand")
-            card.use("discard")
-            card.hidden = true
-        })
+        discard()
+
         get("inPlay").forEach(card => {
             if (card.is("grifts")) {
                 const phaseUI = card.get("phaseUI")[0]
@@ -267,7 +356,7 @@ scene("game", async () => {
             advanceGrifts()
             const phaseIndex = griftPhases.indexOf(grift.griftPhase)
             const deltaSuckers = grift.curve[phaseIndex]
-            grift.suckers += deltaSuckers;
+            grift.suckers = Math.max(grift.suckers + deltaSuckers, 0);
             grift.get("suckerCountUI")[0].text = `suckers: ${grift.suckers}`
        })
 

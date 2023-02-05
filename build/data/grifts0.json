@@ -10,7 +10,7 @@
     {
         "name": "grift 2",
         "description": "satisfaction guaranteed!",
-        "curve": [1, 7, -3, -4],
+        "curve": [3, 7, -3, -4],
         "suckers": 0,
         "firstRoundAvailable": 1,
         "artwork": "AuteurClass"
@@ -18,7 +18,7 @@
     {
         "name": "grift 3",
         "description": "number go up!",
-        "curve": [1, 1, -8, -5],
+        "curve": [5, 10, -8, -5],
         "suckers": 0,
         "firstRoundAvailable": 1,
         "artwork": "Pyramid"
@@ -26,7 +26,7 @@
     {
         "name": "grift 4",
         "description": "you'd be a fool NOT to!",
-        "curve": [1, 9, -6, -3],
+        "curve": [3, 9, -6, -3],
         "suckers": 0,
         "firstRoundAvailable": 1,
         "artwork": "Handshake"

@@ -1,12 +1,4 @@
 export const refreshHand = () => {
-    //hand -> discard
-    //deck -> hand
-    get("hand").forEach(card => {
-        card.unuse("hand");
-        card.use("discard");
-        card.hidden = true;
-    })
-
     const drawCard = (i) => {
         const currentDeck = get("deck");
 
@@ -21,6 +13,7 @@ export const refreshHand = () => {
             currentCard.pos = vec2(10 + 250*i,700) //todo
     }
 
+    //reshuffle if needed
     if (get("deck").length < 3) {
 
         const remainder = get("deck").length
@@ -33,8 +26,6 @@ export const refreshHand = () => {
             card.use("deck")
         })
 
-        console.log(remainder)
-
         for(let i = remainder; i < 3; i++) {
             drawCard(i)
        }
@@ -45,28 +36,4 @@ export const refreshHand = () => {
             drawCard(i)
         }
     }
-
-    
-
-    onHover("hand", card => {
-        const infotext = get("infobox")[0].get("infoText")[0]
-        infotext.text = card.description
-        if (card.is("grifts")) {
-            infotext.text += `\nsucker curve:${card.curve.join("/")}`
-        }
-    })
-
-    onClick("hand", card => {
-        if (card.isSelected) {
-            card.isSelected = false
-            card.scale = vec2(1)
-        } else {
-            get("hand").forEach(c => {
-                c.isSelected = false;
-                c.scale = vec2(1);  
-            })
-            card.isSelected = true;
-            card.scale = vec2(1.5);
-        }
-    })
 }
