@@ -11,8 +11,14 @@ kaboom({
     background:[215,155,25]
   })
 
-loadSound("titleBGM", "./assets/sound/Mr_Moneybags_Rag.mp3")
-loadSound("mainBGM", "./assets/sound/The_Grift.mp3")
+loadSound("titleBGMIntro", "./assets/sound/Mr_Moneybags_Rag_-_intro.mp3")
+loadSound("titleBGMLoop", "./assets/sound/Mr_Moneybags_Rag_-_full_loop.mp3")
+
+loadSound("mainBGMIntro", "./assets/sound/The_Grift_-_intro.mp3")
+loadSound("mainBGMLoop", "./assets/sound/The_Grift_-_full_loop.mp3")
+
+loadSound("loseMusic", "./assets/sound/Desolation_Rag.mp3")
+
 loadSound("dealOne", "./assets/sound/deal_one.wav")
 loadSound("slotHandle", "./assets/sound/slot_handle.wav")
 loadSound("cashRegister", "./assets/sound/cash_register.wav")
@@ -21,37 +27,26 @@ loadSound("nope", "./assets/sound/nope.wav")
 loadFont("duster", "./assets/duster.ttf")
 loadSprite("placeholder", "./assets/sprites/placeholder.png")
 
-const titleMusic = play("titleBGM", {
-    loop: true,
-    paused:true
-})
-
-const mainMusic = play("mainBGM", {
-    loop: true, 
-    paused: true
-})
-
-const loseMusic = null;
+let titleMusicIntro;
+let titleMusic;
+let mainMusicLoop;
 
 
 //-----------------------------------------------------------------------
+
 scene("game", async () => {
+    if (titleMusicIntro) {
+        titleMusicIntro.paused = true
+    }
+    if (titleMusic) {
+        titleMusic.paused = true
+    }
+    const mainMusicIntro = play("mainBGMIntro").then(() => mainMusicLoop = play("mainBGMLoop", {loop:true}))
+
     let turnNumber = 0
     let roundNumber = 0
-
-    //stop other music
-    //start mainBGM into, then => loop main-main
-    // music.play("mainBGM", {
-    //     loop: true
-    // })
-
     let bankBalance = 0
     await initializeGame()
-
-
-
-//     // for debugging only
-//     //const loseButton = addButton("lose", vec2(600,300),() => go("lose"))
 
     const infobox = add([
         "infobox",
@@ -440,11 +435,16 @@ scene("game", async () => {
 
 //-----------------------------------------------------------------
 scene("title", () => {
-    //TODO: if titlemusic is paused:
-    //foreach musics, pause
-    //titlemusic play
-    
-    
+    let isExitingScene = false
+
+    if ((!titleMusicIntro || titleMusicIntro.paused) && (!titleMusic || titleMusic.paused)) {
+        titleMusicIntro = play("titleBGMIntro").then(() => {
+            titleMusic = play("titleBGMLoop", {
+            loop: true
+            })
+        })
+    }
+        
     add([
         color(Color.fromHex(fontColor)),
         pos(margin,height()/3),
@@ -456,7 +456,7 @@ scene("title", () => {
     ])
 
 
-    addButton("start", vec2(width()/3, height()*.666), () => go("game"))
+    addButton("start", vec2(width()/3, height()*.666), () => isExitingScene = true)
     addButton("credits", vec2(width()*.666, height()*.666), () => go("credits"))
 
     const musicButton = addButton("play music", vec2(width()*.9, height()*.666), () => adjustMusic())
@@ -470,6 +470,36 @@ scene("title", () => {
             musicButton.text = "play music"
         }
     }
+
+    const fadeOut = add([
+        rect(width(), height()),
+        opacity(0),
+        color(Color.fromHex(black))
+
+    ])
+
+    onUpdate(() => {
+        if (isExitingScene) {
+            if (titleMusicIntro && !titleMusicIntro.paused) {
+                console.log("titleMusicIntro")
+            } if (titleMusic && !titleMusic.paused){
+                console.log("titleMusic")
+            }
+            if (fadeOut.opacity > 0.95){
+                //  && (!titleMusic || (!titleMusic.paused && titleMusic.volume < 0.1))
+                //   && fadeOut.opacity > .95) {
+                    console.log("here")
+                go("game")
+            } else {
+                if (titleMusicIntro?.volume) {
+                    titleMusicIntro.volume -= dt()
+                } if (titleMusic?.volume) {
+                    titleMusic.volume -= dt()
+                }
+                fadeOut.opacity += dt()
+            }
+        }
+    })
 })
 
 scene("credits", () => {
@@ -481,6 +511,10 @@ scene("credits", () => {
 })
 
 scene("lose", async () => {
+    if (mainMusicLoop) {
+        mainMusicLoop.paused = true
+    }
+    play("loseMusic")
     const loseMsg = add([
         text("YOUR MEMBERSHIP HAS EXPIRED. BYE", {
             size: 144,
@@ -488,9 +522,9 @@ scene("lose", async () => {
         })
     ])
 
-    await wait(2)
+    await wait(12)
     
-    loseMsg.hidden = true
+    //loseMsg.hidden = true
     const restartButton = add([
             text("restart"),
             opacity(1),
