@@ -28,7 +28,6 @@ export const refreshHand = () => {
     }
 
     onHover("hand", card => {
-        console.log("hovering")
         const infotext = get("infobox")[0].get("infoText")[0]
         infotext.text = card.description
         if (card.is("grifts")) {

@@ -156,17 +156,21 @@ scene("game", async () => {
     }
 
     turn.onStateEnter("notif", () => {
-        if (turnNumber == turnsInRound[roundNumber]) {
+        console.log(turnNumber)
+        console.log(turnsInRound[roundNumber])
+        if (turnNumber >= turnsInRound[roundNumber]) {
             checkForGameOver()
+            roundNumber++
+            turnNumber = 0
+        } 
+        
+        if (turnNumber == 0) {
+            turnNumber++
+            bankBalance -= 800 * (roundNumber + 1.5)
+            showNotification()
         } else {
-            if (turnNumber == 0) {
-                turnNumber++
-                bankBalance -= 800 * (roundNumber + 1.5)
-                showNotification()
-            } else {
-                turnNumber++
-                turn.enterState("draw")
-            }
+            turnNumber++
+            turn.enterState("draw")
         }
     })
 
@@ -196,13 +200,37 @@ scene("game", async () => {
     }
 
     turn.onStateUpdate("draw", () => {
-        roundNumber++
         confirmPlayButton.hidden = !get("hand").some(c => c.isSelected);           
     })
+
+    const showSkipTurnButton = (show) => {
+        if (show) {
+            const skipTurnButton = add([
+                "skipButton",
+                rect(200,100),
+                area(),
+                color(Color.fromHex(black)),
+                pos(width()*.9, height()*.6)
+            ])
+
+            skipTurnButton.add([
+                text("skip")
+            ])
+
+            skipTurnButton.onClick(() => turn.enterState("play"))
+        } else {
+            destroyAll("skipButton")
+        }
+    }
 
     turn.onStateEnter("draw", () => {
         updateBankBalanceUI()           
         refreshHand()
+        showSkipTurnButton(true)
+    })
+
+    turn.onStateEnd("draw", () => {
+        showSkipTurnButton(false)
     })
 
     turn.onStateEnter("play", () => {
