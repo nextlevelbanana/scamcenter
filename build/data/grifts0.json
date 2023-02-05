@@ -3,36 +3,42 @@
         "name": "grift 1",
         "description": "never fails!",
         "curve": [3, 5, -4, -2],
+        "suckers": 0,
         "firstRoundAvailable": 1
     },
     {
         "name": "grift 2",
         "description": "satisfaction guaranteed!",
         "curve": [1, 7, -3, -4],
+        "suckers": 0,
         "firstRoundAvailable": 1
     },
     {
         "name": "grift 3",
         "description": "number go up!",
         "curve": [1, 1, -8, -5],
+        "suckers": 0,
         "firstRoundAvailable": 1
     },
     {
         "name": "grift 4",
         "description": "you'd be a fool NOT to!",
         "curve": [1, 9, -6, -3],
+        "suckers": 0,
         "firstRoundAvailable": 1
     },
     {
         "name": "grift 5",
         "description": "a proven winner!",
         "curve": [3, 4, -1, -5],
+        "suckers": 0,
         "firstRoundAvailable": 1
     },
     {
         "name": "grift 6",
         "curve": [3, 4, -3, -4],
         "description": "this one's ALL NEW!",
+        "suckers": 0,
         "firstRoundAvailable": 1
     }
 ]
