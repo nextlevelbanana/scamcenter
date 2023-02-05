@@ -1,5 +1,5 @@
 import kaboom from "kaboom";
-import { fontColor, loanAmounts, margin, topMargin, turnsInRound } from "./constants";
+import { fontColor, fontSize, loanAmounts, margin, topMargin, turnsInRound } from "./constants";
 import { addButton } from "./addButton";
 import { addCredit } from "./addCredit";
 import { initializeGame } from "./initializeGame";
@@ -17,15 +17,16 @@ kaboom({
 loadSound("titleBGMIntro", "./assets/sound/Mr_Moneybags_Rag_intro.mp3")
 loadSound("titleBGMLoop", "./assets/sound/Mr_Moneybags_Rag_loop.mp3")
 
-loadSound("mainBGMIntro", "./assets/sound/The_Grift_-_intro.mp3")
-loadSound("mainBGMLoop", "./assets/sound/The_Grift_-_full_loop.mp3")
+loadSound("mainBGMIntro", "./assets/sound/The_Grift_intro.mp3")
+loadSound("mainBGMLoop", "./assets/sound/The_Grift_loop.mp3")
 
-loadSound("loseMusic", "./assets/sound/Desolation_Rag.mp3")
+loadSound("loseMusic", "./assets/sound/Desolation_Rag_warped_loop.mp3")
 
 loadSound("dealOne", "./assets/sound/deal_one.wav")
 loadSound("slotHandle", "./assets/sound/slot_handle.wav")
 loadSound("cashRegister", "./assets/sound/cash_register.wav")
 loadSound("nope", "./assets/sound/nope.wav")
+loadSound("scratch", "./assets/sound/scratch.mp3")
 
 loadFont("duster", "./assets/duster.ttf")
 loadSprite("placeholder", "./assets/sprites/placeholder.png")
@@ -78,7 +79,7 @@ scene("game", async () => {
     infobox.add([
         "infoText",
         color(black),
-        text("", { size: 32}),
+        text("", { size: fontSize.big}),
     ])
 
     onHover("card", card => {
@@ -128,7 +129,7 @@ scene("game", async () => {
         rect(50,50),
         area(),
         color(Color.fromHex("#880088")),
-        pos(800,0)
+        pos(550,0)
     ])
 
     closeNotif.add([
@@ -196,7 +197,10 @@ scene("game", async () => {
     const checkForGameOver = () => {
         console.log("checking for game over")
         if (bankBalance < 0) {
-            go("lose")
+            mainMusicLoop.paused = true
+            play("scratch").then(() => {
+                go("lose")
+            })
         } else {
             roundNumber++
         }
@@ -527,26 +531,22 @@ scene("title", () => {
 scene("credits", () => {
     addCredit("Qristy Overton", "design, code", "nextlevelbanana.itch.io", 0)
     addCredit("Tuckie", "design, art", null, 1)
-    addCredit("Robert Killen", "music, sfx", null, 2),
+    addCredit("Robert Killen", "music, sound design", "sites.google.com/view/robert-killen-vgm-portfolio", 2),
     addButton("back", vec2(margin, height()*.8), () => go("title"))
 
 })
 
 scene("lose", async () => {
-    if (mainMusicLoop) {
-        mainMusicLoop.paused = true
-    }
-    play("loseMusic")
+    play("loseMusic", {loop: true})
     const loseMsg = add([
         text("YOUR MEMBERSHIP HAS EXPIRED. BYE", {
-            size: 144,
-            width: 1600
+            size: 68,
+            width: 600
         })
     ])
 
-    await wait(12)
+    await wait(2)
     
-    //loseMsg.hidden = true
     const restartButton = add([
             text("restart"),
             opacity(1),
