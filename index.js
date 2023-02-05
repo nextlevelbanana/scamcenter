@@ -21,6 +21,9 @@ loadSound("nope", "./assets/sound/nope.wav")
 loadFont("duster", "./assets/duster.ttf")
 loadSprite("placeholder", "./assets/sprites/placeholder.png")
 
+loadSprite("deck_indicator", "./assets/sprites/deck_indicator.png")
+loadSprite("discard_indicator", "./assets/sprites/discard_indicator.png")
+
 const titleMusic = play("titleBGM", {
     loop: true,
     paused:true
@@ -140,35 +143,41 @@ scene("game", async () => {
    }
 
    const discardUI = add([
-    rect(200,100, {
-        radius: 20
-    }),
     pos(width() - 210, height() - 110),
     opacity(0.2)
    ])
 
-   const discardUIText = add([
+   discardUI.add([
+    sprite("discard_indicator"),
+    scale(2)
+   ])
+
+   const discardUIText = discardUI.add([
     text(`discard (${get("discard").length})`, {
-        size: 18
+        size: 18,
+        font: "duster"
     }),
     color(black),
-    pos(width()- 150, height() - 55)
+    pos(0,0)
    ])
 
    const deckUI = add([
-    rect(200, 100, {
-        radius: 20
-    }),
     pos(width() - 420, height() - 110),
     color(Color.CYAN),
    ])
 
-   const deckUIText = add([
+   deckUI.add([
+    sprite("deck_indicator"),
+    scale(2)
+   ])
+
+   const deckUIText = deckUI.add([
     text(`deck (${get("deck").length})`, {
-        size: 18
+        size: 18,
+        font: "duster"
     }),
     color(black),
-    pos(width() - 350, height() - 205)
+    pos(0,0)
    ])
 
     const turn = add([

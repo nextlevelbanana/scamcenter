@@ -40,7 +40,8 @@ export const createCard = (data, status) => {
         "cardName",
         color(black),
         text(data.name, {
-            size: 24
+            size: 24,
+            font: "duster"
         }),
         pos(6, 200)
     ])
@@ -50,7 +51,8 @@ export const createCard = (data, status) => {
             "suckerCountUI",
             color(white),
             text(`suckers: ${data.suckers ?? 0}`, {
-                size: 24
+                size: 24,
+                font: "duster"
             }),
             pos(0, 0)
         ])
