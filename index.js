@@ -8,11 +8,14 @@ import {refreshHand} from "./refreshHand";
 import { notifs } from "./notifs";
 
 kaboom({
-    background:[215,155,25]
+   width: 640,
+   height: 320,
+   scale: 2,
+   stretch: true
   })
 
-loadSound("titleBGMIntro", "./assets/sound/Mr_Moneybags_Rag_-_intro.mp3")
-loadSound("titleBGMLoop", "./assets/sound/Mr_Moneybags_Rag_-_full_loop.mp3")
+loadSound("titleBGMIntro", "./assets/sound/Mr_Moneybags_Rag_intro.mp3")
+loadSound("titleBGMLoop", "./assets/sound/Mr_Moneybags_Rag_loop.mp3")
 
 loadSound("mainBGMIntro", "./assets/sound/The_Grift_-_intro.mp3")
 loadSound("mainBGMLoop", "./assets/sound/The_Grift_-_full_loop.mp3")
@@ -26,6 +29,24 @@ loadSound("nope", "./assets/sound/nope.wav")
 
 loadFont("duster", "./assets/duster.ttf")
 loadSprite("placeholder", "./assets/sprites/placeholder.png")
+loadSprite("ui_default", "./assets/sprites/ui_default.png", {
+    slice9: {
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: 16
+    },
+    scale: 4
+})
+loadSprite("ui_fancy", "./assets/sprites/ui_fancy_1.png", {
+    slice9: {
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: 16
+    },
+    scale: 4
+})
 
 let titleMusicIntro;
 let titleMusic;
@@ -50,7 +71,6 @@ scene("game", async () => {
 
     const infobox = add([
         "infobox",
-        rect(width() - 200, 120, { radius: 32 }),
         pos(margin, topMargin),
         outline(2)
     ])
@@ -88,8 +108,11 @@ scene("game", async () => {
     })
 
     const notifBox = add([
-        rect(width()*.9, height()*.9, 32),
-        color(Color.fromHex(cyan))
+        sprite("ui_default", {
+            width: 600,
+            height: 300
+        }),
+        pos(20,10)
     ])
 
     notifBox.add([
@@ -447,7 +470,6 @@ scene("title", () => {
         
     add([
         color(Color.fromHex(fontColor)),
-        pos(margin,height()/3),
         text("SCAMCENTER", {
             size: 72,
             align: "left",
