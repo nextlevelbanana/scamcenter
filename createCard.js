@@ -1,4 +1,5 @@
 import { black, white, cyan } from "./colors"
+import { fontSize } from "./constants"
 
 export const createCard = (data, status) => {
     //status: deck | hand | inPlay | discard
@@ -11,17 +12,10 @@ export const createCard = (data, status) => {
         "card",
         status, //tag
         data.kind, //tag
-        rect(200,200),
-        opacity(0),
-        area()
-        //todo: does it need an initial position?
-    ])
-
-    newCard.add([
-        "cardBackground",
         sprite("cardBackground"),
-        scale(4),
-        pos(0,-10)
+        area(),
+        scale(2),
+        z(50)
     ])
 
     if (typeof data.artwork === "string") {
@@ -31,8 +25,7 @@ export const createCard = (data, status) => {
         newCard.add([
             "cardArt",
             sprite(`cardArt_${data.artwork}`),
-            scale(4),
-            pos(0,9)
+            pos(0,4)
         ])
     }
 
@@ -40,26 +33,38 @@ export const createCard = (data, status) => {
         "cardName",
         color(black),
         text(data.name, {
-            size: 24,
-            font: "duster"
+            size: fontSize.sm,
+            font: "duster",
         }),
-        pos(6, 200)
+        pos(4, 54),
+        scale(0.5)
+    ])
+    newCard.add([
+        "cardKind",
+        color(black),
+        text(data.kind, {
+            size: fontSize.sm,
+            font: "duster",
+        }),
+        pos(4, 62),
+        scale(0.5)
     ])
 
     if(newCard.is("grifts")) {
         newCard.add([
             "suckerCountUI",
-            color(white),
             text(`suckers: ${data.suckers ?? 0}`, {
-                size: 24,
+                size: fontSize.sm,
                 font: "duster"
             }),
-            pos(0, 0)
+            pos(4, 72),
+            scale(0.5)
+
         ])
         newCard.add([
             "phaseUI",
             color(cyan),
-            pos(0, 28),
+            pos(4, 68),
             text("test")
         ])
         newCard.get("phaseUI")[0].hidden = true
@@ -69,8 +74,13 @@ export const createCard = (data, status) => {
         newCard.add([
             "fraudUI",
             color(200, 178, 28),
-            text(data.amount),
-            pos(0,28)
+            text(data.amount, {
+                size: fontSize.sm,
+                font: "duster",
+                scale: 1
+            }),
+            pos(4, 72),
+            scale(0.5)
         ])
     }
     return newCard

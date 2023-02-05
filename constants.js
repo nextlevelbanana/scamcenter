@@ -13,10 +13,12 @@ export const fontColor = "#000000"
 export const fontSize = {
     giant: 72,
     big: 36,
-    med: 18
+    med: 18,
+    sm: 12,
+    xs: 4
 }
 
-export const margin = 100
+export const margin = 4
 export const topMargin = 10
 
 export const startingDeckComposition = {

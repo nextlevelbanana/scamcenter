@@ -3,15 +3,17 @@ import { fontColor, fontSize, loanAmounts, margin, topMargin, turnsInRound } fro
 import { addButton } from "./addButton";
 import { addCredit } from "./addCredit";
 import { initializeGame } from "./initializeGame";
-import { black, red, cyan, white } from "./colors";
+import { black, red, cyan, white, green } from "./colors";
 import {refreshHand} from "./refreshHand";
 import { notifs } from "./notifs";
+import { updateInfoText } from "./updateInfoText";
 
 kaboom({
    width: 640,
    height: 320,
    scale: 2,
-   stretch: true
+   stretch: true,
+   background: [122, 160, 126]
   })
 
 loadSound("titleBGMIntro", "./assets/sound/Mr_Moneybags_Rag_intro.mp3")
@@ -52,6 +54,9 @@ loadSprite("ui_fancy", "./assets/sprites/ui_fancy_1.png", {
     },
     scale: 4
 })
+loadSprite("cursor", "./assets/sprites/cursor.png", {
+    scale: 4
+})
 
 let titleMusicIntro;
 let titleMusic;
@@ -87,10 +92,9 @@ scene("game", async () => {
     ])
 
     onHover("card", card => {
-        const infotext = get("infobox")[0].get("infoText")[0]
-        infotext.text = card.description
+        updateInfoText(card.description)
         if (card.is("grifts")) {
-            infotext.text += `\nsucker curve:${card.curve.join("/")}`
+            updateInfoText(`\nsucker curve:${card.curve.join("/")}`, true)
         }
     })
 
@@ -114,18 +118,24 @@ scene("game", async () => {
 
     const notifBox = add([
         sprite("ui_default", {
-            width: 600,
-            height: 300
+            width: 300,
+            height: 150
         }),
-        pos(20,10)
+        pos(20,10),
+        z(100),
+        scale(2)
     ])
 
     notifBox.add([
         "notifText",
         text("", {
-            width: width()*.8
+            width: width()*.8,
+            size: fontSize.med,
+            font: "duster"
         }),
-        color(Color.fromHex(black))
+        color(Color.fromHex(black)),
+        pos(8,8),
+        scale(0.5)
     ])
 
     const closeNotif = notifBox.add([
@@ -133,7 +143,7 @@ scene("game", async () => {
         rect(50,50),
         area(),
         color(Color.fromHex("#880088")),
-        pos(550,0)
+        pos(260,0)
     ])
 
     closeNotif.add([
@@ -163,41 +173,53 @@ scene("game", async () => {
    }
 
    const discardUI = add([
-    pos(width() - 210, height() - 110),
-    opacity(0.2)
-   ])
-
-   discardUI.add([
+    "discardUI",
+    pos(width() - 96 - margin, height() - 60 - margin),
     sprite("discard_indicator"),
-    scale(2)
+    scale(2),
+    area()
    ])
 
-   const discardUIText = discardUI.add([
-    text(`discard (${get("discard").length})`, {
-        size: 18,
-        font: "duster"
-    }),
-    color(black),
-    pos(0,0)
-   ])
+    const discardUIText = discardUI.add([
+        text(`${get("discard").length}`, {
+            size: fontSize.sm,
+            font: "duster"
+        }),
+        color(black),
+        pos(20,10)
+    ])
+
+    onHover("discardUI", () => {
+        updateInfoText("cards in discard")
+    })
+
+    onHoverEnd("discardUI", () => {
+        updateInfoText("")
+    })
 
    const deckUI = add([
-    pos(width() - 420, height() - 110),
-    color(Color.CYAN),
+    "deckUI",
+    pos(width() - 96 - margin, height() - 116 - margin),
+    sprite("deck_indicator"),
+    scale(2),
+    area()
    ])
 
-   deckUI.add([
-    sprite("deck_indicator"),
-    scale(2)
-   ])
+    onHover("deckUI", () => {
+        updateInfoText("cards remaining in deck")
+    })
+
+    onHoverEnd("deckUI", () => {
+        updateInfoText("")
+    })
 
    const deckUIText = deckUI.add([
-    text(`deck (${get("deck").length})`, {
-        size: 18,
+    text(`${get("deck").length}`, {
+        size: fontSize.sm,
         font: "duster"
     }),
     color(black),
-    pos(0,0)
+    pos(20, 10)
    ])
 
     const turn = add([
@@ -264,21 +286,19 @@ scene("game", async () => {
     }
 
     const playPropup = card => {
-        const infoText = get("infobox")[0].get("infoText")[0]
-
         const propuppable = get("inPlay")?.filter(c => c.is("grifts"))
         if (!propuppable || !propuppable.length) {
             play("nope")
-            infoText.text = "nothing to prop up!"
+            updateInfoText("nothing to prop up!")
             card.isSelected = false
         } else {
-            infoText.text = "Prop up which grift?"
+            updateInfoText("Prop up which grift?")
             propuppable.forEach(card => {
                 const propuppable = card.add([
                     "propuppable",
-                    rect(100,100),
+                    sprite("cursor"),
                     area(),
-                    color(Color.fromHex("0099cc"))
+                    pos(10, -20)
                 ])
             })
         }
@@ -286,6 +306,7 @@ scene("game", async () => {
 
     onClick("propuppable", thing => {
         console.log(thing)
+        thing.moveTo(thing.parent)
         //thing.parent = grift card
     })
 
@@ -317,10 +338,10 @@ scene("game", async () => {
         if (show) {
             const skipTurnButton = add([
                 "skipButton",
-                rect(200,100),
+                rect(100,32),
                 area(),
                 color(Color.fromHex(black)),
-                pos(width()*.9, height()*.6)
+                pos(width()*.9, height()*.5)
             ])
 
             skipTurnButton.add([
@@ -462,11 +483,10 @@ scene("game", async () => {
     }
 
     onUpdate(() => {
-        discardUIText.text = `discard (${get("discard").length})`
-        deckUIText.text = `deck (${get("deck").length})`
+        discardUIText.text = `${get("discard").length}`
+        deckUIText.text = `${get("deck").length}`
     })
 
-   
 });
 
 

@@ -1,3 +1,5 @@
+import { margin } from "./constants";
+
 export const refreshHand = () => {
     const drawCard = (i) => {
         const currentDeck = get("deck");
@@ -10,7 +12,7 @@ export const refreshHand = () => {
             currentCard.unuse("deck");
             currentCard.use("hand");
             currentCard.hidden = false;
-            currentCard.pos = vec2(10 + 250*i,700) //todo
+            currentCard.pos = vec2(margin + 96 + 128*i, height() - 192 - margin) //todo
     }
 
     //reshuffle if needed
