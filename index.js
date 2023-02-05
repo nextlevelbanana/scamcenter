@@ -1,5 +1,5 @@
 import kaboom from "kaboom";
-import { fontColor, loanAmounts, margin, topMargin, turnsInRound } from "./constants";
+import { fontColor, fontSize, loanAmounts, margin, topMargin, turnsInRound } from "./constants";
 import { addButton } from "./addButton";
 import { addCredit } from "./addCredit";
 import { initializeGame } from "./initializeGame";
@@ -8,15 +8,25 @@ import {refreshHand} from "./refreshHand";
 import { notifs } from "./notifs";
 
 kaboom({
-    background:[215,155,25]
+   width: 640,
+   height: 320,
+   scale: 2,
+   stretch: true
   })
 
-loadSound("titleBGM", "./assets/sound/Mr_Moneybags_Rag.mp3")
-loadSound("mainBGM", "./assets/sound/The_Grift.mp3")
+loadSound("titleBGMIntro", "./assets/sound/Mr_Moneybags_Rag_intro.mp3")
+loadSound("titleBGMLoop", "./assets/sound/Mr_Moneybags_Rag_loop.mp3")
+
+loadSound("mainBGMIntro", "./assets/sound/The_Grift_intro.mp3")
+loadSound("mainBGMLoop", "./assets/sound/The_Grift_loop.mp3")
+
+loadSound("loseMusic", "./assets/sound/Desolation_Rag_warped_loop.mp3")
+
 loadSound("dealOne", "./assets/sound/deal_one.wav")
 loadSound("slotHandle", "./assets/sound/slot_handle.wav")
 loadSound("cashRegister", "./assets/sound/cash_register.wav")
 loadSound("nope", "./assets/sound/nope.wav")
+loadSound("scratch", "./assets/sound/scratch.mp3")
 
 loadFont("duster", "./assets/duster.ttf")
 loadSprite("placeholder", "./assets/sprites/placeholder.png")
@@ -24,41 +34,48 @@ loadSprite("placeholder", "./assets/sprites/placeholder.png")
 loadSprite("deck_indicator", "./assets/sprites/deck_indicator.png")
 loadSprite("discard_indicator", "./assets/sprites/discard_indicator.png")
 
-const titleMusic = play("titleBGM", {
-    loop: true,
-    paused:true
+loadSprite("ui_default", "./assets/sprites/ui_default.png", {
+    slice9: {
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: 16
+    },
+    scale: 4
+})
+loadSprite("ui_fancy", "./assets/sprites/ui_fancy_1.png", {
+    slice9: {
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: 16
+    },
+    scale: 4
 })
 
-const mainMusic = play("mainBGM", {
-    loop: true, 
-    paused: true
-})
-
-const loseMusic = null;
+let titleMusicIntro;
+let titleMusic;
+let mainMusicLoop;
 
 
 //-----------------------------------------------------------------------
+
 scene("game", async () => {
+    if (titleMusicIntro) {
+        titleMusicIntro.paused = true
+    }
+    if (titleMusic) {
+        titleMusic.paused = true
+    }
+    const mainMusicIntro = play("mainBGMIntro").then(() => mainMusicLoop = play("mainBGMLoop", {loop:true}))
+
     let turnNumber = 0
     let roundNumber = 0
-
-    //stop other music
-    //start mainBGM into, then => loop main-main
-    // music.play("mainBGM", {
-    //     loop: true
-    // })
-
     let bankBalance = 0
     await initializeGame()
 
-
-
-//     // for debugging only
-//     //const loseButton = addButton("lose", vec2(600,300),() => go("lose"))
-
     const infobox = add([
         "infobox",
-        rect(width() - 200, 120, { radius: 32 }),
         pos(margin, topMargin),
         outline(2)
     ])
@@ -66,7 +83,7 @@ scene("game", async () => {
     infobox.add([
         "infoText",
         color(black),
-        text("", { size: 32}),
+        text("", { size: fontSize.big}),
     ])
 
     onHover("card", card => {
@@ -96,8 +113,11 @@ scene("game", async () => {
     })
 
     const notifBox = add([
-        rect(width()*.9, height()*.9, 32),
-        color(Color.fromHex(cyan))
+        sprite("ui_default", {
+            width: 600,
+            height: 300
+        }),
+        pos(20,10)
     ])
 
     notifBox.add([
@@ -113,7 +133,7 @@ scene("game", async () => {
         rect(50,50),
         area(),
         color(Color.fromHex("#880088")),
-        pos(800,0)
+        pos(550,0)
     ])
 
     closeNotif.add([
@@ -187,7 +207,10 @@ scene("game", async () => {
     const checkForGameOver = () => {
         console.log("checking for game over")
         if (bankBalance < 0) {
-            go("lose")
+            mainMusicLoop.paused = true
+            play("scratch").then(() => {
+                go("lose")
+            })
         } else {
             roundNumber++
         }
@@ -449,14 +472,18 @@ scene("game", async () => {
 
 //-----------------------------------------------------------------
 scene("title", () => {
-    //TODO: if titlemusic is paused:
-    //foreach musics, pause
-    //titlemusic play
-    
-    
+    let isExitingScene = false
+
+    if ((!titleMusicIntro || titleMusicIntro.paused) && (!titleMusic || titleMusic.paused)) {
+        titleMusicIntro = play("titleBGMIntro").then(() => {
+            titleMusic = play("titleBGMLoop", {
+            loop: true
+            })
+        })
+    }
+        
     add([
         color(Color.fromHex(fontColor)),
-        pos(margin,height()/3),
         text("SCAMCENTER", {
             size: 72,
             align: "left",
@@ -465,7 +492,7 @@ scene("title", () => {
     ])
 
 
-    addButton("start", vec2(width()/3, height()*.666), () => go("game"))
+    addButton("start", vec2(width()/3, height()*.666), () => isExitingScene = true)
     addButton("credits", vec2(width()*.666, height()*.666), () => go("credits"))
 
     const musicButton = addButton("play music", vec2(width()*.9, height()*.666), () => adjustMusic())
@@ -479,27 +506,57 @@ scene("title", () => {
             musicButton.text = "play music"
         }
     }
+
+    const fadeOut = add([
+        rect(width(), height()),
+        opacity(0),
+        color(Color.fromHex(black))
+
+    ])
+
+    onUpdate(() => {
+        if (isExitingScene) {
+            if (titleMusicIntro && !titleMusicIntro.paused) {
+                console.log("titleMusicIntro")
+            } if (titleMusic && !titleMusic.paused){
+                console.log("titleMusic")
+            }
+            if (fadeOut.opacity > 0.95){
+                //  && (!titleMusic || (!titleMusic.paused && titleMusic.volume < 0.1))
+                //   && fadeOut.opacity > .95) {
+                    console.log("here")
+                go("game")
+            } else {
+                if (titleMusicIntro?.volume) {
+                    titleMusicIntro.volume -= dt()
+                } if (titleMusic?.volume) {
+                    titleMusic.volume -= dt()
+                }
+                fadeOut.opacity += dt()
+            }
+        }
+    })
 })
 
 scene("credits", () => {
     addCredit("Qristy Overton", "design, code", "nextlevelbanana.itch.io", 0)
     addCredit("Tuckie", "design, art", null, 1)
-    addCredit("Robert Killen", "music, sfx", null, 2),
+    addCredit("Robert Killen", "music, sound design", "sites.google.com/view/robert-killen-vgm-portfolio", 2),
     addButton("back", vec2(margin, height()*.8), () => go("title"))
 
 })
 
 scene("lose", async () => {
+    play("loseMusic", {loop: true})
     const loseMsg = add([
         text("YOUR MEMBERSHIP HAS EXPIRED. BYE", {
-            size: 144,
-            width: 1600
+            size: 68,
+            width: 600
         })
     ])
 
     await wait(2)
     
-    loseMsg.hidden = true
     const restartButton = add([
             text("restart"),
             opacity(1),
