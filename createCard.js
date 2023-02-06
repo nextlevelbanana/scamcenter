@@ -2,7 +2,7 @@ import { black, white, cyan } from "./colors"
 import { fontSize } from "./constants"
 
 export const createCard = (data, status) => {
-    //status: deck | hand | inPlay | discard
+    //status: deck | hand | inPlay | discard | potential
     //kind: grifts | frauds | propups | specials
 
     loadSprite("cardBackground", "./assets/sprites/cards/CardBase.png")

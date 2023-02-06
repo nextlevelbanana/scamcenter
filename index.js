@@ -7,6 +7,8 @@ import { black, red, cyan, white, green } from "./colors";
 import {refreshHand} from "./refreshHand";
 import { notifs } from "./notifs";
 import { updateInfoText } from "./updateInfoText";
+import { createThreePotentialCards } from "./createThreePotentialCards";
+import {handleCardSelect} from "./handleCardSelect";
 
 kaboom({
    width: 640,
@@ -100,26 +102,10 @@ scene("game", async () => {
         }
     })
 
-    onClick("card", card => {
-        if (turn.state !== "draw" || !card.is("hand")) {
-            return
-        }
-        if (card.isSelected) {
-            card.isSelected = false
-            card.pos.y += 8
-        } else {
-            get("hand").forEach(c => {
-                if (c.isSelected) {
-                    c.isSelected = false
-                    c.pos.y += 8
-                }
-            })
-            card.isSelected = true
-            card.pos.y -= 8
-        }
-    })
+    onClick("card", card => handleCardSelect(card, turn))
 
     const notifBox = add([
+        "notifBox",
         sprite("ui_default", {
             width: 300,
             height: 150
@@ -156,7 +142,7 @@ scene("game", async () => {
 
     closeNotif.onClick(() => {
         notifBox.hidden = true
-        turn.enterState("draw")
+        turn.enterState("addCardToDeck")
     })
 
     notifBox.hidden = true
@@ -226,7 +212,7 @@ scene("game", async () => {
    ])
 
     const turn = add([
-        state("notif", ["notif", "draw", "play", "suckersMove", "moneyMoves", "griftsCrumble"])
+        state("notif", ["notif", "addCardToDeck", "draw", "play", "suckersMove", "moneyMoves", "griftsCrumble"])
     ])
 
     const checkForGameOver = () => {
@@ -241,6 +227,21 @@ scene("game", async () => {
         }
     }
 
+    const resetBoard = () => {
+        // all in hand and in play and in discard go to deck
+        for (const cardState of ["hand", "inPlay", "discard"])
+        get(cardState).forEach(card => {
+            card.unuse(cardState)
+            card.use("deck")
+            card.pos = vec2 (width() * 2, height() * 2)
+            card.z = 1
+        })
+        //reset grifts
+        get("grifts").forEach(grift => {
+            grift.suckers = 0
+            grift.griftPhase = -1})
+    }
+
     turn.onStateEnter("notif", () => {
         if (turnNumber >= (turnsInRound[roundNumber] ?? 1)) {
             checkForGameOver()
@@ -251,6 +252,7 @@ scene("game", async () => {
         if (turnNumber == 0) {
             turnNumber++
             bankBalance -= 800 * (roundNumber + 1.5)
+            resetBoard()
             showNotification()
         } else {
             turnNumber++
@@ -260,6 +262,8 @@ scene("game", async () => {
 
     const showNotification = () => {
         notifBox.hidden = false
+        notifBox.get("closeNotif")[0].hidden = false
+
         notifBox.get("notifText")[0].text = notifs[roundNumber]
     }
 
@@ -374,6 +378,13 @@ scene("game", async () => {
             destroyAll("skipButton")
         }
     }
+
+    turn.onStateEnter("addCardToDeck", async () => {
+        notifBox.hidden = false
+        notifBox.get("closeNotif")[0].hidden = true
+        await createThreePotentialCards(turn)
+        notifBox.get("notifText")[0].text = "CHOOSE YOUR FREE GIFT!!\n"
+    })
 
     turn.onStateEnter("draw", () => {
         updateBankBalanceUI()           
