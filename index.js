@@ -3,7 +3,7 @@ import { fontColor, fontSize, loanAmounts, margin, topMargin, turnsInRound } fro
 import { addButton } from "./addButton";
 import { addCredit } from "./addCredit";
 import { initializeGame } from "./initializeGame";
-import { black, red, cyan, white, green } from "./colors";
+import { black, red, yellow, white, green } from "./colors";
 import {refreshHand} from "./refreshHand";
 import { notifs } from "./notifs";
 import { updateInfoText } from "./updateInfoText";
@@ -13,8 +13,7 @@ import {handleCardSelect} from "./handleCardSelect";
 kaboom({
    width: 640,
    height: 320,
-   scale: 2,
-   stretch: true
+   scale: 2
   })
 
 loadSound("titleBGMIntro", "./assets/sound/Mr_Moneybags_Rag_intro.mp3")
@@ -61,6 +60,13 @@ loadSprite("cursor", "./assets/sprites/cursor.png", {
 
 loadSprite("bg", "./assets/sprites/Table_Background.png")
 loadSprite("title", "./assets/sprites/TitleLogo.png")
+loadSprite("ceo", "./assets/sprites/ceo.png")
+loadSprite("moneyIcon", "./assets/sprites/icon_money.png", {
+    scale: 2
+})
+loadSprite("timeIcon", "./assets/sprites/icon_time.png", {
+    scale: 2
+})
 
 let titleMusicIntro;
 let titleMusic;
@@ -127,17 +133,25 @@ scene("game", async () => {
         scale(0.5)
     ])
 
+    notifBox.add([
+        sprite("ceo"),
+        pos(240,96),
+        scale(0.5)
+    ])
+
     const closeNotif = notifBox.add([
         "closeNotif",
-        rect(50,50),
+        sprite("ui_default"),
         area(),
-        color(Color.fromHex("#880088")),
-        pos(260,0)
+        scale(0.75),
+        pos(263,0)
     ])
 
     closeNotif.add([
         text("X"),
-        color(Color.fromHex(white))
+        color(Color.fromHex(black)),
+        pos(18,16),
+        scale(0.5)
     ])
 
     closeNotif.onClick(() => {
@@ -147,11 +161,40 @@ scene("game", async () => {
 
     notifBox.hidden = true
 
-   const bankBalanceUI = add([
-    text(new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(bankBalance)),
-    color(Color.fromHex(red)),
-    pos(width()-200, topMargin)
-   ]);
+    const bankBalanceIcon = add([
+        sprite("moneyIcon"), 
+        pos(498, 7)
+    ])
+
+    const bankBalanceUI = bankBalanceIcon.add([
+        text(new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(bankBalance), {
+            size: fontSize.med,
+            font: "duster"
+        }),
+        color(Color.fromHex(red)),
+        pos(20, 0)
+    ])
+
+    const turnsLeftIcon = add([
+        sprite("timeIcon"), 
+        pos(342, 7)
+    ])
+    
+    const turnsLeftUI = turnsLeftIcon.add([
+        text(turnsInRound[roundNumber] - turnNumber, {
+            size: fontSize.med,
+            font: "duster"
+        }),
+        color(Color.fromHex(green)),
+        pos(20,0)
+    ])
+
+    const updateTurnsLeftUI = () => {
+        const turnsLeft = turnsInRound[roundNumber] - turnNumber
+        turnsLeftUI.text = turnsLeft
+        turnsLeftUI.color = turnsLeft < 3 ? Color.fromHex(red) :
+            turnsLeft < 6 ? Color.fromHex(yellow) : Color.fromHex(green)
+    }
 
    const updateBankBalanceUI = (value) => {
     if (value) {
@@ -248,6 +291,7 @@ scene("game", async () => {
             roundNumber++
             turnNumber = 0
         } 
+        updateTurnsLeftUI()
         
         if (turnNumber == 0) {
             turnNumber++
