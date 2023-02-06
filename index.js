@@ -72,6 +72,8 @@ loadSprite("skipButton", "./assets/sprites/button_skip.png", {
     scale: 2
 })
 loadSprite("sucker", "./assets/sprites/icon_sucker.png")
+loadSprite("phaseBar", "./assets/sprites/grift_status_bar.png")
+loadSprite("dot", "./assets/sprites/grift_status_indicator.png")
 
 let titleMusicIntro;
 let titleMusic;
@@ -335,12 +337,12 @@ scene("game", async () => {
     const griftPhases = ["hype", "adoption", "suspicion", "busted"]
 
     const playGrift = card => {
-        const i = get("inPlay").length
-        const cardsPerRow = 5
+        const i = get("inPlay").filter(c => c.is("grifts")).length
+        const cardsPerRow = 6
         card.use("inPlay")
+        card.griftPhase = -1
         card.pos = vec2(16 + 96*(i % cardsPerRow), margin + 40 + (100 * Math.floor(i/cardsPerRow)))
-        
-        //card.get("phaseUI")[0].hidden = true       
+        card.get("phaseBar")[0].hidden = false
     }
 
     const playFraud = card => {
@@ -488,9 +490,8 @@ scene("game", async () => {
 
         get("inPlay").forEach(card => {
             if (card.is("grifts")) {
-                // const phaseUI = card.get("phaseUI")[0]
-                // phaseUI.text = griftPhases[card.griftPhase] ?? ""
-                // phaseUI.hidden = false
+                const dot = card.get("phaseBar")[0].get("dot")[0]
+                dot.hidden = false
             }
         })
 
@@ -512,8 +513,9 @@ scene("game", async () => {
             //and play appropriate sound effect for net gain/loss
         //const activeGrifts = get("inPlay").filter(card => card.is("grifts"))
 
+        advanceGrifts()
+
         activeGrifts().forEach(grift => {
-            advanceGrifts()
             const deltaSuckers = grift.curve[grift.griftPhase]
             grift.suckers = Math.max(grift.suckers + deltaSuckers, 0);
             grift.get("suckerCountUI")[0].text = `suckers: ${grift.suckers}`
@@ -578,17 +580,22 @@ scene("game", async () => {
     })
 
     const advanceGrifts = () => {
+        console.log("starting advanceGrift")
         activeGrifts().forEach(grift => {
-            if (!grift.griftPhase || grift.griftPhase < 0) {
+            console.log(grift.griftPhase)
+            if (grift.griftPhase === undefined || grift.griftPhase === null) {
                 grift.griftPhase = 0;
             } else if (grift.griftPhase < griftPhases.length - 1) {
-                grift.griftPhase = griftPhases[grift.griftPhase+1]
+                grift.griftPhase++
             }
+            console.log("phase? " + grift.griftPhase, grift.id)
+            grift.get("phaseBar")[0].get("dot")[0].pos.x = 5 + 11*grift.griftPhase
         })
     }
 
     turn.onStateUpdate("griftsCrumble", () => {
         activeGrifts().forEach(grift => {
+            
            // grift.get("phaseUI")[0].text = griftPhases[grift.griftPhase]
         })
     })

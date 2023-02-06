@@ -15,6 +15,14 @@ export const refreshHand = () => {
             currentCard.pos = vec2(margin + 16 + 128*i, height() - 170 - margin)
             currentCard.get("cardBackground")[0].hidden = false
             currentCard.get("cardText").forEach(t => t.hidden = false)
+            currentCard.get("phaseBar").forEach(p => {
+                p.hidden = true
+                p.get("dot").forEach(d => {
+                    d.hidden = true
+                    d.pos.x = 5
+                })
+            })
+            currentCard.get("dot").forEach(d => d.hidden = true)
     }
 
     //reshuffle if needed

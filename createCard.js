@@ -78,13 +78,18 @@ export const createCard = (data, status) => {
             color(Color.fromHex(cyan))
 
         ])
-        // newCard.add([
-        //     "phaseUI",
-        //     color(cyan),
-        //     pos(4, 68),
-        //     text("test")
-        // ])
-        // newCard.get("phaseUI")[0].hidden = true
+        const phaseBar = newCard.add([
+            "phaseBar",
+            sprite("phaseBar"),
+            pos(0, -10),
+        ])
+        phaseBar.hidden = true
+        const dot = phaseBar.add([
+            "dot",
+            sprite("dot"),
+            pos(5,2)
+        ])
+        dot.hidden = true
     }
 
     if(newCard.is("frauds")) {
