@@ -67,6 +67,10 @@ loadSprite("moneyIcon", "./assets/sprites/icon_money.png", {
 loadSprite("timeIcon", "./assets/sprites/icon_time.png", {
     scale: 2
 })
+loadSprite("playButton", "./assets/sprites/button_play.png")
+loadSprite("skipButton", "./assets/sprites/button_skip.png", {
+    scale: 2
+})
 
 let titleMusicIntro;
 let titleMusic;
@@ -231,7 +235,7 @@ scene("game", async () => {
 
    const deckUI = add([
     "deckUI",
-    pos(width() - 96 - margin, height() - 116 - margin),
+    pos(width() - 192 - (2*margin), height() - 60 - margin),
     sprite("deck_indicator"),
     scale(2),
     area()
@@ -312,11 +316,20 @@ scene("game", async () => {
     }
 
     const confirmPlay = () => {
+        console.log("confirm play click")
         const selected = get("hand").filter(c => c.isSelected)[0];
         playCard(selected)
     }
 
-    const confirmPlayButton = addButton("play?", vec2(width()*.9, height()*.9), confirmPlay)
+    const confirmPlayButton = add([
+        "playButton",
+        sprite("playButton"),
+        scale(2),
+        area(),
+        pos(width() - 192 - (2*margin), height() - 96 - margin),
+    ])
+
+    confirmPlayButton.onClick(confirmPlay)
 
     const griftPhases = ["hype", "adoption", "suspicion", "busted"]
 
@@ -407,14 +420,10 @@ scene("game", async () => {
         if (show) {
             const skipTurnButton = add([
                 "skipButton",
-                rect(100,32),
+                sprite("skipButton"),
+                scale(2),
                 area(),
-                color(Color.fromHex(black)),
-                pos(width()*.9, height()*.5)
-            ])
-
-            skipTurnButton.add([
-                text("skip")
+                pos(width() - 96 - margin, height() - 96 - margin),
             ])
 
             skipTurnButton.onClick(() => turn.enterState("play"))
