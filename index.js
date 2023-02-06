@@ -105,11 +105,13 @@ scene("game", async () => {
             return
         }
         if (card.isSelected) {
-            deselectCard(card)
+            card.isSelected = false
+            card.pos.y += 8
         } else {
             get("hand").forEach(c => {
                 if (c.isSelected) {
-                    deselectCard(card)
+                    c.isSelected = false
+                    c.pos.y += 8
                 }
             })
             card.isSelected = true
@@ -282,18 +284,13 @@ scene("game", async () => {
         card.use("inPlay")
     }
 
-    const deselectCard = card => {
-        card.isSelected = false
-        card.pos.y -= 8
-    }
-
     const playPropup = card => {
         const propuppable = get("inPlay")?.filter(c => c.is("grifts"))
         if (!propuppable || !propuppable.length) {
             play("nope")
             updateInfoText("nothing to prop up!")
-            deselectCard(card)
-           
+            card.isSelected = false
+            card.pos.y += 8
         } else {
             card.use("active")
             updateInfoText("Prop up which grift?")
@@ -310,7 +307,7 @@ scene("game", async () => {
     }
 
     const onPropUp = (propup, grift) => {
-        //do the thing!
+        console.log("propping up")
         switch (propup.affects) {
             case "suckers":
                 grift.suckers += propup.value
@@ -324,12 +321,13 @@ scene("game", async () => {
     onClick("propuppable", thing => {
         const selectedGrift = thing.parent
         const selectedPropup = get("active")[0]
-        selectedPropup.pos = (selectedGrift.pos.x - 4, selectedGrift.pos.y - 4)
-        //selectedGrift.propups.push(selectedPropup)
-        selectedPropup.z = -1
+        selectedPropup.pos = vec2(selectedGrift.pos.x - 4, selectedGrift.pos.y - 4)
+        selectedPropup.z = 5
+        selectedPropup.use("inPlay")
         selectedPropup.unuse("active")
         onPropUp(selectedPropup, selectedGrift)
-        turn.enterState("suckersMove")
+        console.log("done propping up")
+        turn.enterState("play")
     })
 
     const playCard = card => {
@@ -348,7 +346,6 @@ scene("game", async () => {
 
         if (card.is("grifts") || card.is("frauds")) {
             play("dealOne").then(() => {
-                console.log("entering play")
                 turn.enterState("play")
             })
         }
@@ -389,12 +386,21 @@ scene("game", async () => {
         get("card").forEach(c => {
             c.isSelected = false
         })
+        activeGrifts().forEach(g => {
+            const cursor = g.children?.filter(c => c.is("propuppable"))?.[0]
+            if (cursor) {
+                console.log(cursor)
+                destroy(cursor)
+
+            }
+        })
     })
 
     const discard = () => {
         get("hand").forEach(card => {
             card.unuse("hand");
             if (!card.is("inPlay") || card.is("frauds")) {
+                console.log("discarding", card)
                 card.use("discard");
                 card.hidden = true;
                 card.pos = vec2(width()*1.2, height()*1.2)
@@ -470,16 +476,11 @@ scene("game", async () => {
             })
 
             activeFrauds().forEach(fraud => {
-                console.log(fraud.amount)
                 bankBalance += fraud.amount
-                console.log(bankBalance)
                 play("cashRegister")
             })
 
             updateBankBalanceUI()           
-        //todo: for each fraud played, money += fraud.value
-       // updateBankBalanceUI(card.amount)
-
 
         turn.enterState("griftsCrumble")
     })
