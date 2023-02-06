@@ -16,12 +16,13 @@ export const initializeGame = async() => {
         }
     }
 
-    res = await fetch(`./data/specials.json`)
-    json = await res.json()
-    const relevantItems = json.filter(item => item.kind == "defer")
-    for (i = 0; i < startingDeckComposition.specials; i++) {
-        selectedCards.push(relevantItems[randi(startingDeckComposition.specials)])
-    }
+    //todo: implement specials
+    // res = await fetch(`./data/specials.json`)
+    // json = await res.json()
+    // const relevantItems = json.filter(item => item.kind == "defer")
+    // for (i = 0; i < startingDeckComposition.specials; i++) {
+    //     selectedCards.push(relevantItems[randi(startingDeckComposition.specials)])
+    // }
 
     const deck = []
 
