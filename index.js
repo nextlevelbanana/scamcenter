@@ -71,6 +71,7 @@ loadSprite("playButton", "./assets/sprites/button_play.png")
 loadSprite("skipButton", "./assets/sprites/button_skip.png", {
     scale: 2
 })
+loadSprite("sucker", "./assets/sprites/icon_sucker.png")
 
 let titleMusicIntro;
 let titleMusic;
@@ -335,10 +336,11 @@ scene("game", async () => {
 
     const playGrift = card => {
         const i = get("inPlay").length
-        const cardsPerRow = 3
+        const cardsPerRow = 5
         card.use("inPlay")
-        card.pos = vec2(16 + 96*(i % cardsPerRow), margin + (100 * Math.floor(i/cardsPerRow)))//vec2(10 + 100*i, 150)
-        card.get("phaseUI")[0].hidden = true       
+        card.pos = vec2(16 + 96*(i % cardsPerRow), margin + 40 + (100 * Math.floor(i/cardsPerRow)))
+        
+        //card.get("phaseUI")[0].hidden = true       
     }
 
     const playFraud = card => {
@@ -450,6 +452,12 @@ scene("game", async () => {
         get("card").forEach(c => {
             c.isSelected = false
         })
+        get("inPlay").forEach(c => {
+            c.get("cardBackground")[0].hidden = true
+            c.get("cardText").forEach(t => {
+                t.hidden = true
+            })
+        })
         activeGrifts().forEach(g => {
             const cursor = g.children?.filter(c => c.is("propuppable"))?.[0]
             if (cursor) {
@@ -480,9 +488,9 @@ scene("game", async () => {
 
         get("inPlay").forEach(card => {
             if (card.is("grifts")) {
-                const phaseUI = card.get("phaseUI")[0]
-                phaseUI.text = griftPhases[card.griftPhase] ?? ""
-                phaseUI.hidden = false
+                // const phaseUI = card.get("phaseUI")[0]
+                // phaseUI.text = griftPhases[card.griftPhase] ?? ""
+                // phaseUI.hidden = false
             }
         })
 
@@ -491,7 +499,7 @@ scene("game", async () => {
 
     turn.onStateUpdate("play", () => {
         activeGrifts().forEach(grift => {
-            grift.get("phaseUI").text = griftPhases[grift.griftPhase]
+           // grift.get("phaseUI").text = griftPhases[grift.griftPhase]
         })
     })
 
@@ -581,7 +589,7 @@ scene("game", async () => {
 
     turn.onStateUpdate("griftsCrumble", () => {
         activeGrifts().forEach(grift => {
-            grift.get("phaseUI")[0].text = griftPhases[grift.griftPhase]
+           // grift.get("phaseUI")[0].text = griftPhases[grift.griftPhase]
         })
     })
 

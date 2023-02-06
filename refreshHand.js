@@ -12,7 +12,9 @@ export const refreshHand = () => {
             currentCard.unuse("deck");
             currentCard.use("hand");
             currentCard.hidden = false;
-            currentCard.pos = vec2(margin + 16 + 128*i, height() - 192 - margin) //todo
+            currentCard.pos = vec2(margin + 16 + 128*i, height() - 170 - margin)
+            currentCard.get("cardBackground")[0].hidden = false
+            currentCard.get("cardText").forEach(t => t.hidden = false)
     }
 
     //reshuffle if needed

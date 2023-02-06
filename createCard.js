@@ -1,4 +1,4 @@
-import { black, white, cyan } from "./colors"
+import { black, green, cyan } from "./colors"
 import { fontSize } from "./constants"
 
 export const createCard = (data, status) => {
@@ -12,10 +12,17 @@ export const createCard = (data, status) => {
         "card",
         status, //tag
         data.kind, //tag
-        sprite("cardBackground"),
+        rect(48,48),
+        opacity(0),
         area(),
         scale(2),
         z(50)
+    ])
+
+    newCard.add([
+        sprite("cardBackground"),
+        "cardBackground",
+        pos(0, -10)
     ])
 
     if (typeof data.artwork === "string") {
@@ -25,61 +32,72 @@ export const createCard = (data, status) => {
         newCard.add([
             "cardArt",
             sprite(`cardArt_${data.artwork}`),
-            pos(0,4)
+            pos(0,-5)
         ])
     }
 
     newCard.add([
         "cardName",
+        "cardText",
         color(black),
         text(data.name, {
+            size: fontSize.sm,
+            font: "duster",
+        }),
+        pos(4, 43),
+        scale(0.5)
+    ])
+    newCard.add([
+        "cardKind",
+        "cardText",
+        color(black),
+        text(data.kind, {
             size: fontSize.sm,
             font: "duster",
         }),
         pos(4, 54),
         scale(0.5)
     ])
-    newCard.add([
-        "cardKind",
-        color(black),
-        text(data.kind, {
-            size: fontSize.sm,
-            font: "duster",
-        }),
-        pos(4, 62),
-        scale(0.5)
-    ])
 
     if(newCard.is("grifts")) {
         newCard.add([
-            "suckerCountUI",
-            text(`suckers: ${data.suckers ?? 0}`, {
-                size: fontSize.sm,
-                font: "duster"
-            }),
-            pos(4, 72),
+            "cardText",
+            sprite("sucker"),
+            pos(2,60),
             scale(0.5)
-
         ])
         newCard.add([
-            "phaseUI",
-            color(cyan),
-            pos(4, 68),
-            text("test")
+            "suckerCountUI",
+            "cardText",
+            text(`${data.curve?.join("/")}`, {
+                size: fontSize.sm,
+                font: "duster",
+            }),
+            pos(14, 62),
+            scale(0.5),
+            color(Color.fromHex(cyan))
+
         ])
-        newCard.get("phaseUI")[0].hidden = true
+        // newCard.add([
+        //     "phaseUI",
+        //     color(cyan),
+        //     pos(4, 68),
+        //     text("test")
+        // ])
+        // newCard.get("phaseUI")[0].hidden = true
     }
 
     if(newCard.is("frauds")) {
         newCard.add([
             "fraudUI",
-            color(200, 178, 28),
+            "cardText",
+            color(Color.fromHex(green)),
             text(data.amount, {
                 size: fontSize.sm,
                 font: "duster",
                 scale: 1
             }),
-            pos(4, 72),
+            pos(4, 62),
             scale(0.5)
         ])
     }
