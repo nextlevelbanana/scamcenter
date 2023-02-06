@@ -5,7 +5,8 @@
         "curve": [3, 5, -4, -2],
         "suckers": 0,
         "firstRoundAvailable": 1,
-        "artwork": "Handshake"
+        "artwork": "Handshake",
+        "propups": []
     },
     {
         "name": "grift 2",
@@ -13,7 +14,8 @@
         "curve": [3, 7, -3, -4],
         "suckers": 0,
         "firstRoundAvailable": 1,
-        "artwork": "AuteurClass"
+        "artwork": "AuteurClass",
+        "propups": []
     },
     {
         "name": "grift 3",
@@ -21,7 +23,8 @@
         "curve": [5, 10, -8, -5],
         "suckers": 0,
         "firstRoundAvailable": 1,
-        "artwork": "Pyramid"
+        "artwork": "Pyramid",
+        "propups": []
     },
     {
         "name": "grift 4",
@@ -29,7 +32,8 @@
         "curve": [3, 9, -6, -3],
         "suckers": 0,
         "firstRoundAvailable": 1,
-        "artwork": "Handshake"
+        "artwork": "Handshake",
+        "propups": []
     },
     {
         "name": "grift 5",
@@ -37,7 +41,8 @@
         "curve": [3, 4, -1, -5],
         "suckers": 0,
         "firstRoundAvailable": 1,
-        "artwork": "Handshake"
+        "artwork": "Handshake",
+        "propups": []
     },
     {
         "name": "yearly revision",
@@ -45,6 +50,7 @@
         "description": "built using the LATEST technologies",
         "suckers": 0,
         "firstRoundAvailable": 1,
-        "artwork": "Handshake"
+        "artwork": "Handshake",
+        "propups": []
     }
 ]

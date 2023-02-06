@@ -12,8 +12,7 @@ kaboom({
    width: 640,
    height: 320,
    scale: 2,
-   stretch: true,
-   background: [122, 160, 126]
+   stretch: true
   })
 
 loadSound("titleBGMIntro", "./assets/sound/Mr_Moneybags_Rag_intro.mp3")
@@ -57,6 +56,9 @@ loadSprite("ui_fancy", "./assets/sprites/ui_fancy_1.png", {
 loadSprite("cursor", "./assets/sprites/cursor.png", {
     scale: 4
 })
+
+loadSprite("bg", "./assets/sprites/Table_Background.png")
+loadSprite("title", "./assets/sprites/TitleLogo.png")
 
 let titleMusicIntro;
 let titleMusic;
@@ -102,17 +104,16 @@ scene("game", async () => {
         if (turn.state !== "draw" || !card.is("hand")) {
             return
         }
-        console.log(card.id, card.name, card.isSelected)
         if (card.isSelected) {
-            card.isSelected = false
-            card.scale = vec2(1)
+            deselectCard(card)
         } else {
             get("hand").forEach(c => {
-                c.isSelected = false
-                c.scale = vec2(1)
+                if (c.isSelected) {
+                    deselectCard(card)
+                }
             })
             card.isSelected = true
-            card.scale = vec2(1.5)
+            card.pos.y -= 8
         }
     })
 
@@ -271,18 +272,19 @@ scene("game", async () => {
 
     const playGrift = card => {
         const i = get("inPlay").length
-        play("dealOne")
+        const cardsPerRow = 3
         card.use("inPlay")
-        card.pos = vec2(10 + 300*i, 400)
+        card.pos = vec2(16 + 96*(i % cardsPerRow), margin + (100 * Math.floor(i/cardsPerRow)))//vec2(10 + 100*i, 150)
         card.get("phaseUI")[0].hidden = true       
     }
 
     const playFraud = card => {
-        play("cashRegister").then(() => {
-            card.use("discard")
-            play("dealOne")
-            updateBankBalanceUI(card.amount)
-        })
+        card.use("inPlay")
+    }
+
+    const deselectCard = card => {
+        card.isSelected = false
+        card.pos.y -= 8
     }
 
     const playPropup = card => {
@@ -290,24 +292,44 @@ scene("game", async () => {
         if (!propuppable || !propuppable.length) {
             play("nope")
             updateInfoText("nothing to prop up!")
-            card.isSelected = false
+            deselectCard(card)
+           
         } else {
+            card.use("active")
             updateInfoText("Prop up which grift?")
             propuppable.forEach(card => {
                 const propuppable = card.add([
                     "propuppable",
                     sprite("cursor"),
                     area(),
-                    pos(10, -20)
+                    scale(2),
+                    pos(48, 48)
                 ])
             })
         }
     }
 
+    const onPropUp = (propup, grift) => {
+        //do the thing!
+        switch (propup.affects) {
+            case "suckers":
+                grift.suckers += propup.value
+                break;
+            case "curve": 
+                grift.griftPhase = Math.min(0, grift.griftPhase - propup.value)
+            break;
+        }
+    }
+
     onClick("propuppable", thing => {
-        console.log(thing)
-        thing.moveTo(thing.parent)
-        //thing.parent = grift card
+        const selectedGrift = thing.parent
+        const selectedPropup = get("active")[0]
+        selectedPropup.pos = (selectedGrift.pos.x - 4, selectedGrift.pos.y - 4)
+        //selectedGrift.propups.push(selectedPropup)
+        selectedPropup.z = -1
+        selectedPropup.unuse("active")
+        onPropUp(selectedPropup, selectedGrift)
+        turn.enterState("suckersMove")
     })
 
     const playCard = card => {
@@ -323,10 +345,12 @@ scene("game", async () => {
         } else if (card.is("specials")) {
             console.log("special")
         }
-        card.isSelected = false
-        card.scale = vec2(1)
+
         if (card.is("grifts") || card.is("frauds")) {
-            turn.enterState("play")
+            play("dealOne").then(() => {
+                console.log("entering play")
+                turn.enterState("play")
+            })
         }
     }
 
@@ -362,12 +386,15 @@ scene("game", async () => {
 
     turn.onStateEnd("draw", () => {
         showSkipTurnButton(false)
+        get("card").forEach(c => {
+            c.isSelected = false
+        })
     })
 
     const discard = () => {
         get("hand").forEach(card => {
             card.unuse("hand");
-            if (!card.is("inPlay")) {
+            if (!card.is("inPlay") || card.is("frauds")) {
                 card.use("discard");
                 card.hidden = true;
                 card.pos = vec2(width()*1.2, height()*1.2)
@@ -376,14 +403,15 @@ scene("game", async () => {
     }
 
     turn.onStateEnter("play", () => {
-        confirmPlayButton.hidden = true;
+        console.log("really entering play")
+        confirmPlayButton.hidden = true
 
         discard()
 
         get("inPlay").forEach(card => {
             if (card.is("grifts")) {
                 const phaseUI = card.get("phaseUI")[0]
-                phaseUI.text = card.griftPhase ?? ""
+                phaseUI.text = griftPhases[card.griftPhase] ?? ""
                 phaseUI.hidden = false
             }
         })
@@ -393,11 +421,12 @@ scene("game", async () => {
 
     turn.onStateUpdate("play", () => {
         activeGrifts().forEach(grift => {
-            grift.get("phaseUI").text = grift.griftPhase
+            grift.get("phaseUI").text = griftPhases[grift.griftPhase]
         })
     })
 
     turn.onStateEnter("suckersMove", () => {
+        console.log("suckers movin")
         //for each grift in play...
             //calculate its sucker delta
             //and update its sucker count
@@ -407,8 +436,7 @@ scene("game", async () => {
 
         activeGrifts().forEach(grift => {
             advanceGrifts()
-            const phaseIndex = griftPhases.indexOf(grift.griftPhase)
-            const deltaSuckers = grift.curve[phaseIndex]
+            const deltaSuckers = grift.curve[grift.griftPhase]
             grift.suckers = Math.max(grift.suckers + deltaSuckers, 0);
             grift.get("suckerCountUI")[0].text = `suckers: ${grift.suckers}`
        })
@@ -421,6 +449,8 @@ scene("game", async () => {
 
     turn.onStateEnter("moneyMoves", () => {
         const cashRegister = play("cashRegister", {paused: true})
+        console.log("money movin")
+        console.log(get("inPlay"))
         //for each grift in play,
             //money += suckers * suckerValue (currently all 10)
             //const activeGrifts = get("inPlay").filter(card => card.is("grifts"))
@@ -438,13 +468,31 @@ scene("game", async () => {
 
                 }
             })
+
+            activeFrauds().forEach(fraud => {
+                console.log(fraud.amount)
+                bankBalance += fraud.amount
+                console.log(bankBalance)
+                play("cashRegister")
+            })
+
             updateBankBalanceUI()           
         //todo: for each fraud played, money += fraud.value
+       // updateBankBalanceUI(card.amount)
+
 
         turn.enterState("griftsCrumble")
     })
 
+    turn.onStateEnd("moneyMoves", () => {
+        activeFrauds().forEach(fraud => {
+            fraud.unuse("inPlay")
+            fraud.use("discard")
+        })
+    })
+
     const activeGrifts = () => get("inPlay").filter(card => card.is("grifts"))
+    const activeFrauds = () => get("inPlay").filter(card => card.is("frauds"))
 
     turn.onStateEnter("griftsCrumble", () => {
         activeGrifts().forEach(grift => {
@@ -458,18 +506,17 @@ scene("game", async () => {
 
     const advanceGrifts = () => {
         activeGrifts().forEach(grift => {
-            if (!grift.griftPhase) {
-                grift.griftPhase = "hype";
-            } else if (grift.griftPhase !== "busted") {
-                const griftIndex = griftPhases.indexOf(grift.griftPhase)
-                grift.griftPhase = griftPhases[griftIndex+1]
+            if (!grift.griftPhase || grift.griftPhase < 0) {
+                grift.griftPhase = 0;
+            } else if (grift.griftPhase < griftPhases.length - 1) {
+                grift.griftPhase = griftPhases[grift.griftPhase+1]
             }
         })
     }
 
     turn.onStateUpdate("griftsCrumble", () => {
         activeGrifts().forEach(grift => {
-            grift.get("phaseUI")[0].text = grift.griftPhase
+            grift.get("phaseUI")[0].text = griftPhases[grift.griftPhase]
         })
     })
 
@@ -492,6 +539,17 @@ scene("game", async () => {
 
 //-----------------------------------------------------------------
 scene("title", () => {
+
+    add([
+        sprite("bg"),
+        scale(2),
+        stay()
+    ])
+
+    add([
+        sprite("title"),
+        scale(4)
+    ])
     let isExitingScene = false
 
     if ((!titleMusicIntro || titleMusicIntro.paused) && (!titleMusic || titleMusic.paused)) {
@@ -501,21 +559,13 @@ scene("title", () => {
             })
         })
     }
-        
-    add([
-        color(Color.fromHex(fontColor)),
-        text("SCAMCENTER", {
-            size: 72,
-            align: "left",
-            font: "duster"
-        })
-    ])
 
 
-    addButton("start", vec2(width()/3, height()*.666), () => isExitingScene = true)
-    addButton("credits", vec2(width()*.666, height()*.666), () => go("credits"))
 
-    const musicButton = addButton("play music", vec2(width()*.9, height()*.666), () => adjustMusic())
+    addButton("start", vec2(540, height()*.333), () => isExitingScene = true)
+    addButton("credits", vec2(540, height()*.666), () => go("credits"))
+
+   // const musicButton = addButton("play music", vec2(width()*.9, height()*.666), () => adjustMusic())
 
     const adjustMusic = () => {
         if(titleMusic.paused) {
@@ -531,20 +581,11 @@ scene("title", () => {
         rect(width(), height()),
         opacity(0),
         color(Color.fromHex(black))
-
     ])
 
     onUpdate(() => {
         if (isExitingScene) {
-            if (titleMusicIntro && !titleMusicIntro.paused) {
-                console.log("titleMusicIntro")
-            } if (titleMusic && !titleMusic.paused){
-                console.log("titleMusic")
-            }
             if (fadeOut.opacity > 0.95){
-                //  && (!titleMusic || (!titleMusic.paused && titleMusic.volume < 0.1))
-                //   && fadeOut.opacity > .95) {
-                    console.log("here")
                 go("game")
             } else {
                 if (titleMusicIntro?.volume) {
