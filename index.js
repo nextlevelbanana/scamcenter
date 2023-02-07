@@ -78,6 +78,7 @@ loadSprite("dot", "./assets/sprites/grift_status_indicator.png")
 let titleMusicIntro;
 let titleMusic;
 let mainMusicLoop;
+let loseMusic;
 
 
 //-----------------------------------------------------------------------
@@ -322,9 +323,7 @@ scene("game", async () => {
         console.log("checking for game over")
         if (bankBalance < 0) {
             mainMusicLoop.paused = true
-            play("scratch").then(() => {
-                go("lose")
-            })
+           go("lose")
         } else {
             roundNumber++
         }
@@ -675,6 +674,10 @@ scene("game", async () => {
 //-----------------------------------------------------------------
 scene("title", () => {
 
+    if(loseMusic && !loseMusic.paused) {
+        loseMusic.paused = true
+    }
+
     add([
         sprite("bg"),
         scale(2),
@@ -743,33 +746,69 @@ scene("credits", () => {
 })
 
 scene("lose", async () => {
-    play("loseMusic", {loop: true})
-    const loseMsg = add([
+    play("scratch").then(() => { loseMusic = play("loseMusic", {loop: true})})
+
+    const notifBox = add([
+        "notifBox",
+        sprite("ui_default", {
+            width: 300,
+            height: 150
+        }),
+        pos(20,10),
+        z(100),
+        scale(2)
+    ])
+
+    notifBox.add([
+        "notifText",
         text("YOUR MEMBERSHIP HAS EXPIRED. BYE", {
-            size: 68,
-            width: 600
-        })
+            width: width()*.8,
+            size: fontSize.giant,
+            font: "duster"
+        }),
+        color(Color.fromHex(black)),
+        pos(8,8),
+        scale(0.5)
+    ])
+
+    notifBox.add([
+        sprite("ceo"),
+        pos(240,96),
+        scale(0.5)
     ])
 
     await wait(2)
     
     const restartButton = add([
-            text("restart"),
+            text("restart", {
+                size: fontSize.med,
+                font: "duster"
+            }),
             opacity(1),
             fadeIn(.6),
-            pos(200,400),
-            area()
+            pos(32, 280),
+            area(),
+            z(150),
+            scale(1),
+            color(Color.fromHex(green))
         ])
     restartButton.onClick(() => {
         destroyAll("*")
         go("title")
     })
     const creditsButton = add([
-        text("credits"),
+        text("credits", {
+            size: fontSize.med,
+            font: "duster"
+        }),
         opacity(1),
         fadeIn(.6),
-        pos(600,400),
-        area()
+        pos(132,280),
+        area(),
+        z(150),
+        scale(1),
+        color(Color.fromHex(green))
+
     ])
     creditsButton.onClick(() => {
         destroyAll("*")
