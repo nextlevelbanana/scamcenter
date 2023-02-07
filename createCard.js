@@ -10,6 +10,7 @@ export const createCard = (data, status) => {
     const newCard = add([
         data,   
         "card",
+        "hasInfoText",
         status, //tag
         data.kind, //tag
         rect(48,48),
@@ -48,7 +49,7 @@ export const createCard = (data, status) => {
     newCard.add([
         "cardName",
         "cardText",
-        color(black),
+        color(Color.fromHex(black)),
         text(data.name, {
             size: fontSize.sm,
             font: "duster",
@@ -59,7 +60,7 @@ export const createCard = (data, status) => {
     newCard.add([
         "cardKind",
         "cardText",
-        color(black),
+        color(Color.fromHex(black)),
         text(data.kind, {
             size: fontSize.sm,
             font: "duster",

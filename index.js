@@ -99,16 +99,74 @@ scene("game", async () => {
     const infobox = add([
         "infobox",
         pos(margin, topMargin),
-        outline(2)
+        sprite("ui_default", {
+            width: 128,
+            height: 64
+        }),
+        scale(2),
+        pos(372, 134),
+        z(2000)
+        
     ])
     
     infobox.add([
         "infoText",
-        color(black),
-        text("", { size: fontSize.big}),
+        color(Color.fromHex(black)),
+        scale(0.5),
+        pos(16,16),
+        text("", { size: fontSize.sm, width: 192}),
     ])
 
+    infobox.add([
+        sprite("ceo"),
+        scale(0.25),
+        pos(96,32)
+    ])
+
+    infobox.hidden = true
+
+    // onHover("hasInfoText", () => {
+    //     console.log("onhovertext")
+    //     infobox.hidden = false
+    // })
+
+    // onHoverEnd("hasInfoText", () => {
+    //     ("endhover")
+    //     infobox.hidden = true
+    //     updateInfoText("")
+    // })
+    
+    // const uiBox = add([
+    //     "whichGrift",
+    //     sprite("ui_default"),
+    //     pos(width() - 192 - (2*margin), height() - 96 - margin),
+    //     scale(2),
+    //     z(3000)
+    // ])
+
+    // uiBox.add([
+    //     text("Prop up which grift?", {
+    //         font: "duster",
+    //         size: fontSize.sm,
+    //         width: 90
+    //     }) ,
+    //     color(Color.fromHex(black)),
+    //     scale(0.5),
+    //     pos(8,24)
+    // ])
+
+    //uiBox.hidden = true
+
+    // onHoverUpdate("propups", (thing) => {
+    //     console.log("hoverUpdate")
+    //     if (thing.isSelected) {
+    //         infobox.hidden = true
+    //         //uiBox.hidden = false
+    //     }
+    // })
+
     onHover("card", card => {
+        console.log("hovercard")
         updateInfoText(card.description)
         if (card.is("grifts")) {
             updateInfoText(`\nsucker curve:${card.curve.join("/")}`, true)
@@ -213,6 +271,7 @@ scene("game", async () => {
 
    const discardUI = add([
     "discardUI",
+    "hasInfoText",
     pos(width() - 96 - margin, height() - 60 - margin),
     sprite("discard_indicator"),
     scale(2),
@@ -224,7 +283,7 @@ scene("game", async () => {
             size: fontSize.sm,
             font: "duster"
         }),
-        color(black),
+        color(Color.fromHex(black)),
         pos(20,10)
     ])
 
@@ -232,12 +291,9 @@ scene("game", async () => {
         updateInfoText("cards in discard")
     })
 
-    onHoverEnd("discardUI", () => {
-        updateInfoText("")
-    })
-
    const deckUI = add([
     "deckUI",
+    "hasInfoText",
     pos(width() - 192 - (2*margin), height() - 60 - margin),
     sprite("deck_indicator"),
     scale(2),
@@ -248,16 +304,12 @@ scene("game", async () => {
         updateInfoText("cards remaining in deck")
     })
 
-    onHoverEnd("deckUI", () => {
-        updateInfoText("")
-    })
-
    const deckUIText = deckUI.add([
     text(`${get("deck").length}`, {
         size: fontSize.sm,
         font: "duster"
     }),
-    color(black),
+    color(Color.fromHex(black)),
     pos(20, 10)
    ])
 
@@ -294,6 +346,7 @@ scene("game", async () => {
     }
 
     turn.onStateEnter("notif", () => {
+        console.log("entering notif")
         if (turnNumber >= (turnsInRound[roundNumber] ?? 1)) {
             checkForGameOver()
             roundNumber++
@@ -320,7 +373,6 @@ scene("game", async () => {
     }
 
     const confirmPlay = () => {
-        console.log("confirm play click")
         const selected = get("hand").filter(c => c.isSelected)[0];
         playCard(selected)
     }
@@ -350,15 +402,19 @@ scene("game", async () => {
         card.use("inPlay")
     }
 
+
+
     const playPropup = card => {
         const propuppable = get("inPlay")?.filter(c => c.is("grifts"))
         if (!propuppable || !propuppable.length) {
-            updateInfoText("nothing to prop up!")
+            play("nope")
+            //updateInfoText("nothing to prop up!")
             card.isSelected = false
             card.pos.y += 8
         } else {
             card.use("active")
-            updateInfoText("Prop up which grift?")
+            //updateInfoText("Prop up which grift?")
+            //console.log("here?")
             propuppable.forEach(card => {
                 const propuppable = card.add([
                     "propuppable",
@@ -390,6 +446,7 @@ scene("game", async () => {
         selectedPropup.z = 105
         selectedPropup.use("inPlay")
         selectedPropup.unuse("active")
+        // destroyAll("whichGrift")
         onPropUp(selectedPropup, selectedGrift)
         turn.enterState("play")
     })
@@ -444,7 +501,8 @@ scene("game", async () => {
     })
 
     turn.onStateEnter("draw", () => {
-        updateBankBalanceUI()           
+        updateBankBalanceUI()       
+        console.log("refreshhand")    
         refreshHand()
         showSkipTurnButton(true)
     })
@@ -463,7 +521,6 @@ scene("game", async () => {
         activeGrifts().forEach(g => {
             const cursor = g.children?.filter(c => c.is("propuppable"))?.[0]
             if (cursor) {
-                console.log(cursor)
                 destroy(cursor)
 
             }
@@ -530,7 +587,6 @@ scene("game", async () => {
     turn.onStateEnter("moneyMoves", () => {
         const cashRegister = play("cashRegister", {paused: true})
         console.log("money movin")
-        console.log(get("inPlay"))
         //for each grift in play,
             //money += suckers * suckerValue (currently all 10)
             //const activeGrifts = get("inPlay").filter(card => card.is("grifts"))
@@ -545,7 +601,6 @@ scene("game", async () => {
                         wait(0.3)
                         play("cashRegister")
                     }
-
                 }
             })
 
@@ -560,6 +615,7 @@ scene("game", async () => {
     })
 
     turn.onStateEnd("moneyMoves", () => {
+        console.log("end moneymove")
         activeFrauds().forEach(fraud => {
             fraud.unuse("inPlay")
             fraud.use("discard")
@@ -570,25 +626,24 @@ scene("game", async () => {
     const activeFrauds = () => get("inPlay").filter(card => card.is("frauds"))
 
     turn.onStateEnter("griftsCrumble", () => {
+        console.log("entering crumble")
         activeGrifts().forEach(grift => {
             if (grift.suckers < 3) {
                 crumble(grift)
             } 
         })
-
+        console.log("entering notif")
         turn.enterState("notif")
     })
 
     const advanceGrifts = () => {
         console.log("starting advanceGrift")
         activeGrifts().forEach(grift => {
-            console.log(grift.griftPhase)
             if (grift.griftPhase === undefined || grift.griftPhase === null) {
                 grift.griftPhase = 0;
             } else if (grift.griftPhase < griftPhases.length - 1) {
                 grift.griftPhase++
             }
-            console.log("phase? " + grift.griftPhase, grift.id)
             grift.get("phaseBar")[0].get("dot")[0].pos.x = 5 + 11*grift.griftPhase
         })
     }
