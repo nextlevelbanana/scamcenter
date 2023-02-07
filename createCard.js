@@ -37,10 +37,12 @@ export const createCard = (data, status) => {
         ])
     } else {
         loadSprite("propup", "./assets/sprites/icon_propup.png")
-        if (newCard.kind === "propups") {
+        loadSprite("fraud", "./assets/sprites/icon_money.png")
+
+        if (newCard.kind === "propups" || newCard.kind === "frauds") {
             newCard.add([
                 "cardArt",
-                sprite("propup"),
+                sprite(newCard.kind.substring(0, newCard.kind.length - 1)),
                 pos(15,12)
             ])
         }

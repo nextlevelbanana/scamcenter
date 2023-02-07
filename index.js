@@ -9,6 +9,7 @@ import { notifs } from "./notifs";
 import { updateInfoText } from "./updateInfoText";
 import { createThreePotentialCards } from "./createThreePotentialCards";
 import {handleCardSelect} from "./handleCardSelect";
+import { createConsequence } from "./createConsequence";
 
 kaboom({
    width: 640,
@@ -24,14 +25,15 @@ loadSound("mainBGMLoop", "./assets/sound/The_Grift_loop.mp3")
 
 loadSound("loseMusic", "./assets/sound/Desolation_Rag_warped_loop.mp3")
 
+loadSound("angry", "./assets/sound/angry.wav")
 loadSound("dealOne", "./assets/sound/deal_one.wav")
 loadSound("slotHandle", "./assets/sound/slot_handle.wav")
 loadSound("cashRegister", "./assets/sound/cash_register.wav")
 loadSound("nope", "./assets/sound/nope.wav")
 loadSound("scratch", "./assets/sound/scratch.mp3")
+loadSound("stingerCons", "./assets/sound/stinger_conseq.mp3")
 
 loadFont("duster", "./assets/duster.ttf")
-loadSprite("placeholder", "./assets/sprites/placeholder.png")
 
 loadSprite("deck_indicator", "./assets/sprites/deck_indicator.png")
 loadSprite("discard_indicator", "./assets/sprites/discard_indicator.png")
@@ -339,9 +341,7 @@ scene("game", async () => {
             card.z = 1
         })
         //reset grifts
-        get("grifts").forEach(grift => {
-            grift.suckers = 0
-            grift.griftPhase = -1})
+        
     }
 
     turn.onStateEnter("notif", () => {
@@ -428,6 +428,7 @@ scene("game", async () => {
 
     const onPropUp = (propup, grift) => {
         console.log("propping up")
+        propup.whichGrift = grift.id //needed for crumble cleanup
         switch (propup.affects) {
             case "suckers":
                 grift.suckers += propup.value
@@ -445,7 +446,6 @@ scene("game", async () => {
         selectedPropup.z = 105
         selectedPropup.use("inPlay")
         selectedPropup.unuse("active")
-        // destroyAll("whichGrift")
         onPropUp(selectedPropup, selectedGrift)
         turn.enterState("play")
     })
@@ -462,6 +462,10 @@ scene("game", async () => {
             playPropup(card)
         } else if (card.is("specials")) {
             console.log("special")
+        } else if (card.is("consequences")) {
+            play("nope")
+            card.isSelected = false
+            card.pos.y += 8
         }
 
         if (card.is("grifts") || card.is("frauds")) {
@@ -554,16 +558,9 @@ scene("game", async () => {
         play("slotHandle").then(() => turn.enterState("suckersMove"))
     })
 
-    turn.onStateUpdate("play", () => {
-        activeGrifts().forEach(grift => {
-           // grift.get("phaseUI").text = griftPhases[grift.griftPhase]
-        })
-    })
-
     const otherSuckersLeave = grift => {
         const meeples = grift.get("meeples")
         const diff = meeples.length - grift.suckers
-        console.log("excess?", diff)
         if (diff > 0) {
             for (let i = 0; i < diff; i++) {
                 meeples[i].enterState("bored")
@@ -684,11 +681,23 @@ scene("game", async () => {
 
     const crumble = grift => {
         console.log("crumbly crumble!")
-        //grift.suckers = 0
-        //grift -> discard
-        //any children -> discard
-        //new consequence -> discard
-        //sfx
+        play("stingerCons").then(() => {
+            shake()
+            grift.get("meeples").forEach(m => m.enterState("bored"))
+            grift.suckers = 0
+            grift.griftPhase = -1
+            grift.unuse("inPlay")
+            grift.use("discard")
+            grift.pos = vec2(width()*2, height()*2)
+            createConsequence()
+            const propups = get("inPlay").filter(c => c.is("propups")).filter(c => c.whichGrift === grift.id)
+            propups.forEach(c => {
+                c.unuse("inPlay")
+                c.use("discard")
+                c.pos = vec2(width()*2, height()*2)
+                c.whichGrift = null
+            })
+        })
     }
 
     onUpdate(() => {

@@ -24,6 +24,10 @@ export const refreshHand = () => {
                     })
                 })
                 currentCard.get("dot").forEach(d => d.hidden = true)
+                //currentCard.get("meeples").forEach(m => destroy(m))
+                if (currentCard.is("grifts")) {
+                    currentCard.suckers = 0
+                }
         }
 
     //reshuffle if needed
@@ -41,19 +45,11 @@ export const refreshHand = () => {
             card.use("deck")
         })
 
-        console.log(get("deck").length)
-        console.log(remainder)
-        console.log(get("hand").length)
-
         while(get("hand").length < 3 && get("deck").length) {
             drawCard(get("hand").length)
         }
-    //     for(let i = remainder - 1; i < Math.min(3, get("deck").length); i++) {
-    //         console.log("drawing")
-    //         drawCard(i)
-    //    }
+
     } else { //enough cards
-        console.log("enough cards")
         for (let i = 0; i < 3; i++) {
             drawCard(i)
         }
