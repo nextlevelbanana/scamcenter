@@ -560,21 +560,49 @@ scene("game", async () => {
         })
     })
 
+    const otherSuckersLeave = grift => {
+        const meeples = grift.get("meeples")
+        const diff = meeples.length - grift.suckers
+        console.log("excess?", diff)
+        if (diff > 0) {
+            for (let i = 0; i < diff; i++) {
+                meeples[i].enterState("bored")
+            }
+        }
+    }
+
     turn.onStateEnter("suckersMove", () => {
         console.log("suckers movin")
-        //for each grift in play...
-            //calculate its sucker delta
-            //and update its sucker count
-            //then update the UI
-            //and play appropriate sound effect for net gain/loss
-        //const activeGrifts = get("inPlay").filter(card => card.is("grifts"))
 
         advanceGrifts()
 
         activeGrifts().forEach(grift => {
             const deltaSuckers = grift.curve[grift.griftPhase]
             grift.suckers = Math.max(grift.suckers + deltaSuckers, 0);
-            grift.get("suckerCountUI")[0].text = `suckers: ${grift.suckers}`
+            console.log(grift.get("meeples").length)
+            while (grift.get("meeples").length < grift.suckers) {
+                console.log(grift.get("meeples").length)
+
+                const meeple = grift.add([
+                    "meeples",
+                    scale(1),
+                    z(300),
+                    area(),
+                    pos(rand(16), rand(16)),
+                    sprite("sucker"),
+                    offscreen({ destroy: true }),
+                    state("ooh", ["ooh", "bored"])
+                ])
+                meeple.onUpdate(() => {
+                    meeple.pos.x += rand(-0.3,0.3)
+                    meeple.pos.y += rand(-.3, 0.3)
+                })
+                meeple.onStateUpdate("bored", () => {
+                    meeple.move(rand(8,15),rand(8,15)) //bye
+                })
+            }
+            
+            otherSuckersLeave(grift)
        })
 
        turn.enterState("moneyMoves")
