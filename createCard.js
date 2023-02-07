@@ -34,6 +34,15 @@ export const createCard = (data, status) => {
             sprite(`cardArt_${data.artwork}`),
             pos(0,-5)
         ])
+    } else {
+        loadSprite("propup", "./assets/sprites/icon_propup.png")
+        if (newCard.kind === "propups") {
+            newCard.add([
+                "cardArt",
+                sprite("propup"),
+                pos(15,12)
+            ])
+        }
     }
 
     newCard.add([
@@ -106,5 +115,6 @@ export const createCard = (data, status) => {
             scale(0.5)
         ])
     }
+
     return newCard
 }

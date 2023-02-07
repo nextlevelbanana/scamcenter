@@ -262,6 +262,7 @@ scene("game", async () => {
    ])
 
     const turn = add([
+        "turn",
         state("notif", ["notif", "addCardToDeck", "draw", "play", "suckersMove", "moneyMoves", "griftsCrumble"])
     ])
 
@@ -352,7 +353,6 @@ scene("game", async () => {
     const playPropup = card => {
         const propuppable = get("inPlay")?.filter(c => c.is("grifts"))
         if (!propuppable || !propuppable.length) {
-            play("nope")
             updateInfoText("nothing to prop up!")
             card.isSelected = false
             card.pos.y += 8
@@ -365,7 +365,7 @@ scene("game", async () => {
                     sprite("cursor"),
                     area(),
                     scale(2),
-                    pos(48, 48)
+                    pos(16, 16)
                 ])
             })
         }
@@ -386,12 +386,11 @@ scene("game", async () => {
     onClick("propuppable", thing => {
         const selectedGrift = thing.parent
         const selectedPropup = get("active")[0]
-        selectedPropup.pos = vec2(selectedGrift.pos.x - 4, selectedGrift.pos.y - 4)
-        selectedPropup.z = 5
+        selectedPropup.pos = vec2(selectedGrift.pos.x + (rand(64)-8), selectedGrift.pos.y - (rand(64)-8))
+        selectedPropup.z = 105
         selectedPropup.use("inPlay")
         selectedPropup.unuse("active")
         onPropUp(selectedPropup, selectedGrift)
-        console.log("done propping up")
         turn.enterState("play")
     })
 
@@ -417,7 +416,8 @@ scene("game", async () => {
     }
 
     turn.onStateUpdate("draw", () => {
-        confirmPlayButton.hidden = !get("hand").some(c => c.isSelected);           
+        confirmPlayButton.hidden = !get("hand").some(c => c.isSelected);  
+
     })
 
     const showSkipTurnButton = (show) => {
