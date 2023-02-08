@@ -3,7 +3,7 @@ import { fontColor, fontSize, loanAmounts, margin, topMargin, turnsInRound } fro
 import { addButton } from "./addButton";
 import { addCredit } from "./addCredit";
 import { initializeGame } from "./initializeGame";
-import { black, red, yellow, white, green } from "./colors";
+import { black, red, yellow, white, green, dark } from "./colors";
 import {refreshHand} from "./refreshHand";
 import { notifs } from "./notifs";
 import { updateInfoText } from "./updateInfoText";
@@ -169,7 +169,6 @@ scene("game", async () => {
     // })
 
     onHover("card", card => {
-        console.log("hovercard")
         updateInfoText(card.description)
         if (card.is("grifts")) {
             updateInfoText(`\nsucker curve:${card.curve.join("/")}`, true)
@@ -333,15 +332,13 @@ scene("game", async () => {
 
     const resetBoard = () => {
         // all in hand and in play and in discard go to deck
-        for (const cardState of ["hand", "inPlay", "discard"])
+        for (const cardState of ["hand", "inPlay", "discard", "crumbled"])
         get(cardState).forEach(card => {
             card.unuse(cardState)
             card.use("deck")
             card.pos = vec2 (width() * 2, height() * 2)
             card.z = 1
-        })
-        //reset grifts
-        
+        })        
     }
 
     turn.onStateEnter("notif", () => {
@@ -388,12 +385,28 @@ scene("game", async () => {
 
     const griftPhases = ["hype", "adoption", "suspicion", "busted"]
 
-    const playGrift = card => {
-        const i = get("inPlay").filter(c => c.is("grifts")).length
+    const placeCardOnMat = card => {
         const cardsPerRow = 6
+        const filledMatSlots = get("inPlay").filter(c => c.is("grifts")).map(c => c.pos)
+        let played = false
+        let i = 0
+        do {
+            card.pos = vec2(16 + 96*(i % cardsPerRow), margin + 40 + (100 * Math.floor(i/cardsPerRow)))
+            if (!filledMatSlots.some(p => p.x == card.pos.x && p.y == card.pos.y)) {
+                played = true
+            }
+            i++
+        } while (played == false)
+
+
+    }
+
+    const playGrift = card => {
         card.use("inPlay")
-        card.griftPhase = -1
-        card.pos = vec2(16 + 96*(i % cardsPerRow), margin + 40 + (100 * Math.floor(i/cardsPerRow)))
+        //card.griftPhase = -1
+
+        placeCardOnMat(card)
+
         card.get("phaseBar")[0].hidden = false
     }
 
@@ -404,7 +417,7 @@ scene("game", async () => {
 
 
     const playPropup = card => {
-        const propuppable = get("inPlay")?.filter(c => c.is("grifts"))
+        const propuppable = get("inPlay")?.filter(c => c.is("grifts") && !c.is("crumbled"))
         if (!propuppable || !propuppable.length) {
             play("nope")
             //updateInfoText("nothing to prop up!")
@@ -412,8 +425,6 @@ scene("game", async () => {
             card.pos.y += 8
         } else {
             card.use("active")
-            //updateInfoText("Prop up which grift?")
-            //console.log("here?")
             propuppable.forEach(card => {
                 const propuppable = card.add([
                     "propuppable",
@@ -452,16 +463,12 @@ scene("game", async () => {
 
     const playCard = card => {
         if (card.is("grifts")) {
-            console.log("grift!")
             playGrift(card)
         } else if (card.is("frauds")) {
-            console.log("fraud!")
             playFraud(card)
         } else if (card.is("propups")) {
-            console.log("propup")
             playPropup(card)
         } else if (card.is("specials")) {
-            console.log("special")
         } else if (card.is("consequences")) {
             play("nope")
             card.isSelected = false
@@ -543,7 +550,7 @@ scene("game", async () => {
     }
 
     turn.onStateEnter("play", () => {
-        console.log("really entering play")
+        console.log("entering play")
         confirmPlayButton.hidden = true
 
         discard()
@@ -558,16 +565,7 @@ scene("game", async () => {
         play("slotHandle").then(() => turn.enterState("suckersMove"))
     })
 
-    const otherSuckersLeave = grift => {
-        const meeples = grift.get("meeples")
-        const diff = meeples.length - grift.suckers
-        if (diff > 0) {
-            for (let i = 0; i < diff; i++) {
-                meeples[i].enterState("bored")
-            }
-        }
-    }
-
+   
     turn.onStateEnter("suckersMove", () => {
         console.log("suckers movin")
 
@@ -575,28 +573,43 @@ scene("game", async () => {
 
         activeGrifts().forEach(grift => {
             const deltaSuckers = grift.curve[grift.griftPhase]
-            grift.suckers = Math.max(grift.suckers + deltaSuckers, 0);
-            while (grift.get("meeples").length < grift.suckers) {
-                const meeple = grift.add([
-                    "meeples",
-                    scale(1),
-                    z(300),
-                    area(),
-                    pos(rand(16), rand(16)),
-                    sprite("sucker"),
-                    offscreen({ destroy: true }),
-                    state("ooh", ["ooh", "bored"])
-                ])
-                meeple.onUpdate(() => {
-                    meeple.pos.x += rand(-0.3,0.3)
-                    meeple.pos.y += rand(-.3, 0.3)
-                })
-                meeple.onStateUpdate("bored", () => {
-                    meeple.move(rand(8,15),rand(8,15)) //bye
-                })
+            console.log(grift.suckers)
+            grift.suckers += Number(deltaSuckers)
+            if (grift.suckers < 0) {
+                grift.suckers = 0
             }
-            
-            otherSuckersLeave(grift)
+
+            if (deltaSuckers < 0) {
+                let suckersToBore = Math.abs(deltaSuckers)
+                let suckersLeft = grift.get("meeples").filter(m => m.state == "ooh")
+                for (let i = 0; i < suckersToBore; i++) {
+                    suckersLeft[i]?.enterState("bored")
+                }
+            } else {
+                for(let i = 0; i < deltaSuckers; i++) {
+                    const meeple = grift.add([
+                        "meeples",
+                        scale(1),
+                        z(300),
+                        area(),
+                        pos(rand(16), rand(16)),
+                        sprite("sucker"),
+                        state("ooh", ["ooh", "bored"])
+                    ])
+                    meeple.onUpdate(() => {
+                        meeple.pos.x += rand(-0.3,0.3)
+                        meeple.pos.y += rand(-.3, 0.3)
+                    })
+                    meeple.onStateUpdate("bored", () => {
+                        if (meeple.screenPos().y > height()/2) {
+                            meeple.use("offscreen")
+                        } else {
+                            meeple.move(rand(-15,15),rand(8,25)) //bye
+                        }
+                    })
+                }
+            }
+
        })
 
        turn.enterState("moneyMoves")
@@ -608,10 +621,6 @@ scene("game", async () => {
     turn.onStateEnter("moneyMoves", () => {
         const cashRegister = play("cashRegister", {paused: true})
         console.log("money movin")
-        //for each grift in play,
-            //money += suckers * suckerValue (currently all 10)
-            //const activeGrifts = get("inPlay").filter(card => card.is("grifts"))
-
             activeGrifts().forEach(grift => {
                 const oldBalance = bankBalance
                 bankBalance += grift.suckers * (grift.suckerValue ?? 10)
@@ -643,18 +652,19 @@ scene("game", async () => {
         })
     })
 
-    const activeGrifts = () => get("inPlay").filter(card => card.is("grifts"))
+    const activeGrifts = () => get("inPlay").filter(card => card.is("grifts") &&!card.is("crumbled"))
     const activeFrauds = () => get("inPlay").filter(card => card.is("frauds"))
 
     turn.onStateEnter("griftsCrumble", () => {
         console.log("entering crumble")
         activeGrifts().forEach(grift => {
             if (grift.suckers < 3) {
+                grift.use("crumbled")
                 crumble(grift)
             } 
         })
-        console.log("entering notif")
         turn.enterState("notif")
+
     })
 
     const advanceGrifts = () => {
@@ -669,22 +679,21 @@ scene("game", async () => {
         })
     }
 
-    turn.onStateUpdate("griftsCrumble", () => {
-        activeGrifts().forEach(grift => {
-            
-           // grift.get("phaseUI")[0].text = griftPhases[grift.griftPhase]
-        })
+    onUpdate("crumbled", c => {
+        if (c.get("meeples").every(m => m.is("offscreen"))) {
+            c.unuse("crumbled")
+            c.unuse("inPlay")
+            c.use("discard")
+            c.pos = vec2(width() * 2, height() * 2)
+        }
     })
 
     const crumble = grift => {
         console.log("crumbly crumble!")
+        grift.get("cardArt")[0].color = Color.fromHex(dark)
         play("stingerCons").then(() => {
-            shake()
-            grift.suckers = 0
-            grift.griftPhase = -1
-            grift.unuse("inPlay")
-            grift.use("discard")
-            grift.pos = vec2(width()*2, height()*2)
+            grift.get("phaseBar")[0].hidden = true
+            grift.get("meeples").forEach(m => m.enterState("bored"))
             createConsequence()
             const propups = get("inPlay").filter(c => c.is("propups")).filter(c => c.whichGrift === grift.id)
             propups.forEach(c => {

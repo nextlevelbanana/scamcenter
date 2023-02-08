@@ -32,6 +32,7 @@ export const createCard = (data, status) => {
 
         newCard.add([
             "cardArt",
+            area(),
             sprite(`cardArt_${data.artwork}`),
             pos(0,-5)
         ])

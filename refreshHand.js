@@ -3,16 +3,17 @@ import { margin } from "./constants";
 export const refreshHand = () => {
 
     const drawCard = (i) => {
-        const currentDeck = get("deck");
+        const currentDeck = get("deck")
 
-            let currentCard;
+            let currentCard
                 do {
-                    currentCard = choose(currentDeck);
-                } while (!currentCard || !currentCard.is("deck"));
+                    currentCard = choose(currentDeck)
+                } while (!currentCard || !currentCard.is("deck"))
 
-                currentCard.unuse("deck");
-                currentCard.use("hand");
-                currentCard.hidden = false;
+                currentCard.unuse("deck")
+                currentCard.unuse("crumbled")
+                currentCard.use("hand")
+                currentCard.hidden = false
                 currentCard.pos = vec2(margin + 16 + 128*i, height() - 170 - margin)
                 currentCard.get("cardBackground")[0].hidden = false
                 currentCard.get("cardText").forEach(t => t.hidden = false)
@@ -27,6 +28,8 @@ export const refreshHand = () => {
                 currentCard.get("meeples").forEach(m => destroy(m))
                 if (currentCard.is("grifts")) {
                     currentCard.suckers = 0
+                    currentCard.griftPhase = -1
+                    currentCard.get("cardArt")[0].color = undefined
                 }
         }
 
@@ -37,8 +40,6 @@ export const refreshHand = () => {
         for(let i = 0; i < remainder; i++) {
             drawCard(i)
         }
-
-        console.log("41", get("deck").length, get("hand").length, get("discard").length)
 
         get("discard").forEach(card => {
             card.unuse("discard")

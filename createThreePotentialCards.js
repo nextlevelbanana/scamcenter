@@ -15,7 +15,7 @@ export const createThreePotentialCards = async (turn) => {
         cardData.kind = kinds[thisKind]
         const cardObj = createCard(cardData, "potential")
         cardObj.use("potential")
-        cardObj.pos = vec2(48 + 128*i, 52)
+        cardObj.pos = vec2(48 + 128*i, 60)
         cardObj.z = 101
 
         cardObj.onClick(() => {
