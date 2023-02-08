@@ -24,7 +24,7 @@ export const refreshHand = () => {
                     })
                 })
                 currentCard.get("dot").forEach(d => d.hidden = true)
-                //currentCard.get("meeples").forEach(m => destroy(m))
+                currentCard.get("meeples").forEach(m => destroy(m))
                 if (currentCard.is("grifts")) {
                     currentCard.suckers = 0
                 }

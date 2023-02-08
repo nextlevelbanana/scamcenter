@@ -1,7 +1,7 @@
 [
     {
-        "name": "grift 1",
-        "description": "never fails!",
+        "name": "Investment Scam",
+        "description": "What do you mean, 'it says SCAM right in the title?'",
         "curve": [3, 5, -4, -2],
         "suckers": 0,
         "firstRoundAvailable": 1,
@@ -9,8 +9,8 @@
         "propups": []
     },
     {
-        "name": "grift 2",
-        "description": "satisfaction guaranteed!",
+        "name": "Masterclass",
+        "description": "The secrets THEY don't want you to know!",
         "curve": [3, 7, -3, -4],
         "suckers": 0,
         "firstRoundAvailable": 1,
@@ -18,8 +18,8 @@
         "propups": []
     },
     {
-        "name": "grift 3",
-        "description": "number go up!",
+        "name": "Wellness Retreat",
+        "description": "(masks not required)",
         "curve": [5, 10, -8, -5],
         "suckers": 0,
         "firstRoundAvailable": 1,
@@ -27,8 +27,8 @@
         "propups": []
     },
     {
-        "name": "grift 4",
-        "description": "you'd be a fool NOT to!",
+        "name": "New Franchise",
+        "description": "You'd be a fool NOT to!",
         "curve": [3, 9, -6, -3],
         "suckers": 0,
         "firstRoundAvailable": 1,
@@ -36,8 +36,8 @@
         "propups": []
     },
     {
-        "name": "grift 5",
-        "description": "a proven winner!",
+        "name": "Synergy!",
+        "description": "Don't think! Just invest!",
         "curve": [3, 4, -1, -5],
         "suckers": 0,
         "firstRoundAvailable": 1,
@@ -45,12 +45,38 @@
         "propups": []
     },
     {
-        "name": "yearly revision",
+        "name": "Ebooks! Of... Content!",
         "curve": [3, 4, -3, -4],
-        "description": "built using the LATEST technologies",
+        "description": "Information you literally can't get anywhere else!",
         "suckers": 0,
         "firstRoundAvailable": 1,
-        "artwork": "Handshake",
+        "artwork": "AuteurClass",
+        "propups": []
+    }
+    , {
+        "name": "Mushroom Essence",
+        "curve": [3, 4, -3, -2],
+        "description": "It'll balance all your... mushroom deficiencies...",
+        "suckers": 0,
+        "firstRoundAvailable": 1,
+        "artwork": "Pyramid",
+        "propups": []
+    },  {
+        "name": "Candle Cleanse",
+        "curve": [3, 5, -1, -1],
+        "description": "Get in on the cleanse trend! Don't ask what they do with the candles.",
+        "suckers": 0,
+        "firstRoundAvailable": 1,
+        "artwork": "Pyramid",
+        "propups": []
+    },
+    {
+        "name": "iOS App",
+        "curve": [3, 5, -3, -4],
+        "description": "What's it do? Shut up, it's an app!",
+        "suckers": 0,
+        "firstRoundAvailable": 1,
+        "artwork": "AuteurClass",
         "propups": []
     }
 ]

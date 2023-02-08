@@ -13,7 +13,7 @@ import { createConsequence } from "./createConsequence";
 
 kaboom({
    width: 640,
-   height: 320,
+   height: 360,
    scale: 2
   })
 
@@ -576,10 +576,7 @@ scene("game", async () => {
         activeGrifts().forEach(grift => {
             const deltaSuckers = grift.curve[grift.griftPhase]
             grift.suckers = Math.max(grift.suckers + deltaSuckers, 0);
-            console.log(grift.get("meeples").length)
             while (grift.get("meeples").length < grift.suckers) {
-                console.log(grift.get("meeples").length)
-
                 const meeple = grift.add([
                     "meeples",
                     scale(1),
@@ -683,7 +680,6 @@ scene("game", async () => {
         console.log("crumbly crumble!")
         play("stingerCons").then(() => {
             shake()
-            grift.get("meeples").forEach(m => m.enterState("bored"))
             grift.suckers = 0
             grift.griftPhase = -1
             grift.unuse("inPlay")

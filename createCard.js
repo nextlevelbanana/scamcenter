@@ -106,16 +106,44 @@ export const createCard = (data, status) => {
 
     if(newCard.is("frauds")) {
         newCard.add([
+            "cardText",
+            sprite("moneyIcon"),
+            pos(2,60),
+            scale(0.5)
+        ])
+        newCard.add([
             "fraudUI",
             "cardText",
             color(Color.fromHex(green)),
             text(data.amount, {
                 size: fontSize.sm,
-                font: "duster",
-                scale: 1
-            }),
-            pos(4, 62),
+                font: "duster"
+        }),
+            pos(14, 62),
+            scale(0.5),
+
+        ])
+    }
+
+    if(newCard.is("propups")) {
+        const [icon, offsetX, offsetY] = data.affects == "curve" ? ["phaseBar", 28, 60] : ["sucker", 14, 62]
+        newCard.add([
+            "cardText",
+            sprite(icon),
+            pos(2,60),
             scale(0.5)
+        ])
+        newCard.add([
+            "propupUI",
+            "cardText",
+            color(Color.fromHex(green)),
+            text(data.value, {
+                size: fontSize.sm,
+                font: "duster"
+        }),
+            pos(offsetX, offsetY),
+            scale(0.5),
+
         ])
     }
 

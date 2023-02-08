@@ -1,30 +1,30 @@
 [{
-    "name": "dine and dash",
-    "description": "Lorem Ipsum dollar sit amet",
+    "name": "Dine and Dash",
+    "description": "Is it glamorous? No. Does it work? ...once.",
     "amount": 100,
     "firstRoundAvailable": 1
 },
 {
-    "name": "wire fraud",
-    "description": "Lorem Ipsum dollar sit amet",
+    "name": "Wire Fraud",
+    "description": "Can't go wrong with the classics!",
     "amount": 200,
     "firstRoundAvailable": 1
 },
 {
-    "name": "identity theft",
-    "description": "Lorem Ipsum dollar sit amet",
+    "name": "Identity Theft",
+    "description": "If their password is 'password', they're basically asking for it.",
     "amount": 300,
     "firstRoundAvailable": 1
 },
 {
-    "name": "paypal phishing",
-    "description": "Lorem Ipsum dollar sit amet",
+    "name": "Paypal Phishing",
+    "description": "The thinking man's scam.",
     "amount": 400,
     "firstRoundAvailable": 1
 },
 {
-    "name": "tax fraud",
-    "description": "Lorem Ipsum dollar sit amet",
+    "name": "Tax Fraud",
+    "description": "Everybody does it!",
     "amount": 500,
     "firstRoundAvailable": 1
 }

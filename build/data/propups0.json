@@ -1,30 +1,30 @@
 [
     {
-        "name": "propup 1",
-        "description": "Lorem Ipsum dollar sit amet",
-        "affects": "curve",
-        "value": 1,
-        "firstRoundAvailable": 1
-    },
-    {
-        "name": "propup 2",
-        "description": "Lorem Ipsum dollar sit amet",
-        "affects": "suckers",
-        "value": 1,
-        "firstRoundAvailable": 1
-    },
-    {
-        "name": "propup 3",
-        "description": "Lorem Ipsum dollar sit amet",
+        "name": "Rebrand",
+        "description": "A rose by any other name... makes people forget the rose poisoned a bunch of puppies last year.",
         "affects": "curve",
         "value": 2,
         "firstRoundAvailable": 1
     },
     {
-        "name": "propup 4",
-        "description": "Lorem Ipsum dollar sit amet",
+        "name": "News Article",
+        "description": "What's it say? Who cares! All press is good press.",
         "affects": "suckers",
-        "value": 2,
+        "value": 3,
+        "firstRoundAvailable": 1
+    },
+    {
+        "name": "Buy Own Books",
+        "description": "Bestseller list, here we come!",
+        "affects": "curve",
+        "value": 1,
+        "firstRoundAvailable": 1
+    },
+    {
+        "name": "Viral Tweet",
+        "description": "Wait, that's still a thing?",
+        "affects": "suckers",
+        "value": 1,
         "firstRoundAvailable": 1
     }
 ]
