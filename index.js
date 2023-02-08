@@ -229,7 +229,9 @@ scene("game", async () => {
     notifBox.hidden = true
 
     const bankBalanceIcon = add([
+        "bankBalanceIcon",
         sprite("moneyIcon"), 
+        area(),
         pos(498, 7)
     ])
 
@@ -403,7 +405,6 @@ scene("game", async () => {
 
     const playGrift = card => {
         card.use("inPlay")
-        //card.griftPhase = -1
 
         placeCardOnMat(card)
 
@@ -411,6 +412,7 @@ scene("game", async () => {
     }
 
     const playFraud = card => {
+        flyMoney(card)
         card.use("inPlay")
     }
 
@@ -443,6 +445,7 @@ scene("game", async () => {
         switch (propup.affects) {
             case "suckers":
                 grift.suckers += propup.value
+                addMeeples(grift, propup.value)
                 break;
             case "curve": 
                 grift.griftPhase = Math.min(0, grift.griftPhase - propup.value)
@@ -541,7 +544,6 @@ scene("game", async () => {
         get("hand").forEach(card => {
             card.unuse("hand");
             if (!card.is("inPlay") || card.is("frauds")) {
-                console.log("discarding", card)
                 card.use("discard");
                 card.hidden = true;
                 card.pos = vec2(width()*1.2, height()*1.2)
@@ -565,6 +567,31 @@ scene("game", async () => {
         play("slotHandle").then(() => turn.enterState("suckersMove"))
     })
 
+    const addMeeples = (grift, howMany) => {
+        for (let i = 0; i < howMany; i++) {
+            const meeple = grift.add([
+                "meeples",
+                scale(1),
+                z(300),
+                area(),
+                pos(rand(16), rand(16)),
+                sprite("sucker"),
+                state("ooh", ["ooh", "bored"])
+            ])
+            meeple.onUpdate(() => {
+                meeple.pos.x += rand(-0.3,0.3)
+                meeple.pos.y += rand(-.3, 0.3)
+            })
+            meeple.onStateUpdate("bored", () => {
+                if (meeple.screenPos().y > height()/2) {
+                    meeple.use("offscreen")
+                } else {
+                    meeple.move(rand(-15,15),rand(8,25)) //bye
+                }
+            })
+        }
+    }
+
    
     turn.onStateEnter("suckersMove", () => {
         console.log("suckers movin")
@@ -573,7 +600,6 @@ scene("game", async () => {
 
         activeGrifts().forEach(grift => {
             const deltaSuckers = grift.curve[grift.griftPhase]
-            console.log(grift.suckers)
             grift.suckers += Number(deltaSuckers)
             if (grift.suckers < 0) {
                 grift.suckers = 0
@@ -586,28 +612,7 @@ scene("game", async () => {
                     suckersLeft[i]?.enterState("bored")
                 }
             } else {
-                for(let i = 0; i < deltaSuckers; i++) {
-                    const meeple = grift.add([
-                        "meeples",
-                        scale(1),
-                        z(300),
-                        area(),
-                        pos(rand(16), rand(16)),
-                        sprite("sucker"),
-                        state("ooh", ["ooh", "bored"])
-                    ])
-                    meeple.onUpdate(() => {
-                        meeple.pos.x += rand(-0.3,0.3)
-                        meeple.pos.y += rand(-.3, 0.3)
-                    })
-                    meeple.onStateUpdate("bored", () => {
-                        if (meeple.screenPos().y > height()/2) {
-                            meeple.use("offscreen")
-                        } else {
-                            meeple.move(rand(-15,15),rand(8,25)) //bye
-                        }
-                    })
-                }
+                addMeeples(grift, deltaSuckers)
             }
 
        })
@@ -618,6 +623,25 @@ scene("game", async () => {
     turn.onStateUpdate("suckersMove", () => {
     })
 
+    const flyMoney = (card) => {
+        const MONEY = add([
+            sprite("moneyIcon"),
+            pos(card.pos),
+            area(),
+            z(5000),
+            "flyingMoney"
+        ])
+
+        MONEY.onUpdate(() => {
+            MONEY.moveTo(bankBalanceIcon.pos.x, bankBalanceIcon.pos.y, 240)
+        })
+
+        MONEY.onCollide("bankBalanceIcon", icon => {
+            destroy(MONEY)
+            console.log("moneys?", get("flyingMoney").length)
+        })
+    }
+
     turn.onStateEnter("moneyMoves", () => {
         const cashRegister = play("cashRegister", {paused: true})
         console.log("money movin")
@@ -625,6 +649,7 @@ scene("game", async () => {
                 const oldBalance = bankBalance
                 bankBalance += grift.suckers * (grift.suckerValue ?? 10)
                 if (bankBalance > oldBalance) {
+                    flyMoney(grift)
                     if (cashRegister.paused) {
                         play("cashRegister")
                     } else {

@@ -45,7 +45,7 @@
         "propups": []
     },
     {
-        "name": "Ebooks! Of... Content!",
+        "name": "AI-written Ebooks",
         "curve": [3, 4, -3, -4],
         "description": "Information you literally can't get anywhere else!",
         "suckers": 0,
@@ -54,9 +54,9 @@
         "propups": []
     }
     , {
-        "name": "Mushroom Essence",
+        "name": "Mushroom Vapor",
         "curve": [3, 4, -3, -2],
-        "description": "It'll balance all your... mushroom deficiencies...",
+        "description": "It'll restore all your... mushroom... deficiencies...",
         "suckers": 0,
         "firstRoundAvailable": 1,
         "artwork": "Pyramid",
