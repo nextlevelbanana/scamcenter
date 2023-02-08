@@ -6,7 +6,6 @@ import { initializeGame } from "./initializeGame";
 import { black, red, yellow, white, green, dark } from "./colors";
 import {refreshHand} from "./refreshHand";
 import { notifs } from "./notifs";
-import { updateInfoText } from "./updateInfoText";
 import { createThreePotentialCards } from "./createThreePotentialCards";
 import {handleCardSelect} from "./handleCardSelect";
 import { createConsequence } from "./createConsequence";
@@ -98,82 +97,6 @@ scene("game", async () => {
     let roundNumber = 0
     let bankBalance = 0
     await initializeGame()
-
-    const infobox = add([
-        "infobox",
-        pos(margin, topMargin),
-        sprite("ui_default", {
-            width: 128,
-            height: 64
-        }),
-        scale(2),
-        pos(372, 134),
-        z(2000)
-        
-    ])
-    
-    infobox.add([
-        "infoText",
-        color(Color.fromHex(black)),
-        scale(0.5),
-        pos(16,16),
-        text("", { size: fontSize.sm, width: 192}),
-    ])
-
-    infobox.add([
-        sprite("ceo"),
-        scale(0.25),
-        pos(96,32)
-    ])
-
-    infobox.hidden = true
-
-    // onHover("hasInfoText", () => {
-    //     console.log("onhovertext")
-    //     infobox.hidden = false
-    // })
-
-    // onHoverEnd("hasInfoText", () => {
-    //     ("endhover")
-    //     infobox.hidden = true
-    //     updateInfoText("")
-    // })
-    
-    // const uiBox = add([
-    //     "whichGrift",
-    //     sprite("ui_default"),
-    //     pos(width() - 192 - (2*margin), height() - 96 - margin),
-    //     scale(2),
-    //     z(3000)
-    // ])
-
-    // uiBox.add([
-    //     text("Prop up which grift?", {
-    //         font: "duster",
-    //         size: fontSize.sm,
-    //         width: 90
-    //     }) ,
-    //     color(Color.fromHex(black)),
-    //     scale(0.5),
-    //     pos(8,24)
-    // ])
-
-    //uiBox.hidden = true
-
-    // onHoverUpdate("propups", (thing) => {
-    //     console.log("hoverUpdate")
-    //     if (thing.isSelected) {
-    //         infobox.hidden = true
-    //         //uiBox.hidden = false
-    //     }
-    // })
-
-    onHover("card", card => {
-        updateInfoText(card.description)
-        if (card.is("grifts")) {
-            updateInfoText(`\nsucker curve:${card.curve.join("/")}`, true)
-        }
-    })
 
     onClick("card", card => handleCardSelect(card, turn))
 
@@ -275,7 +198,6 @@ scene("game", async () => {
 
    const discardUI = add([
     "discardUI",
-    "hasInfoText",
     pos(width() - 96 - margin, height() - 60 - margin),
     sprite("discard_indicator"),
     scale(2),
@@ -291,22 +213,13 @@ scene("game", async () => {
         pos(20,10)
     ])
 
-    onHover("discardUI", () => {
-        updateInfoText("cards in discard")
-    })
-
    const deckUI = add([
     "deckUI",
-    "hasInfoText",
     pos(width() - 192 - (2*margin), height() - 60 - margin),
     sprite("deck_indicator"),
     scale(2),
     area()
    ])
-
-    onHover("deckUI", () => {
-        updateInfoText("cards remaining in deck")
-    })
 
    const deckUIText = deckUI.add([
     text(`${get("deck").length}`, {
@@ -422,7 +335,6 @@ scene("game", async () => {
         const propuppable = get("inPlay")?.filter(c => c.is("grifts") && !c.is("crumbled"))
         if (!propuppable || !propuppable.length) {
             play("nope")
-            //updateInfoText("nothing to prop up!")
             card.isSelected = false
             card.pos.y += 8
         } else {
@@ -638,7 +550,6 @@ scene("game", async () => {
 
         MONEY.onCollide("bankBalanceIcon", icon => {
             destroy(MONEY)
-            console.log("moneys?", get("flyingMoney").length)
         })
     }
 

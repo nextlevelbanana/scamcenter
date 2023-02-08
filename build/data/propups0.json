@@ -1,7 +1,7 @@
 [
     {
         "name": "Rebrand",
-        "description": "A rose by any other name... makes people forget the rose poisoned a bunch of puppies last year.",
+        "description": "A rose by any other name makes them forget the rose poisoned some puppies last year.",
         "affects": "curve",
         "value": 2,
         "firstRoundAvailable": 1
@@ -25,6 +25,13 @@
         "description": "Wait, that's still a thing?",
         "affects": "suckers",
         "value": 1,
+        "firstRoundAvailable": 1
+    },
+    {
+        "name": "Podcast ads",
+        "description": "Use offer code NOTASCAM for 10% off",
+        "affects": "suckers",
+        "value": 2,
         "firstRoundAvailable": 1
     }
 ]

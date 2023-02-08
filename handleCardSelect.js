@@ -14,6 +14,5 @@ export const handleCardSelect = (card, turn) => {
         })
         card.isSelected = true
         card.pos.y -= 8
-        get("infobox")[0].hidden = true
     }
 }

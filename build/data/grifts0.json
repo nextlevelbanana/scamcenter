@@ -78,5 +78,14 @@
         "firstRoundAvailable": 1,
         "artwork": "AuteurClass",
         "propups": []
+    },
+    {
+        "name": "Private College",
+        "description": "Who needs accreditation when you have REPUTATION?",
+        "curve": [12, -1, -3, -3],
+        "suckers": 0,
+        "firstRoundAvailable": 1,
+        "artwork": "Handshake",
+        "propups": []
     }
 ]

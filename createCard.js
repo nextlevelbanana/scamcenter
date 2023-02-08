@@ -1,4 +1,4 @@
-import { black, green, cyan } from "./colors"
+import { black, green, cyan, dark } from "./colors"
 import { fontSize } from "./constants"
 
 export const createCard = (data, status) => {
@@ -10,7 +10,6 @@ export const createCard = (data, status) => {
     const newCard = add([
         data,   
         "card",
-        "hasInfoText",
         status, //tag
         data.kind, //tag
         rect(48,48),
@@ -147,6 +146,22 @@ export const createCard = (data, status) => {
 
         ])
     }
+
+    console.log(data.description)
+    if (data.description) {
+    newCard.add([
+        "description",
+        "cardText",
+        text(data.description, {
+            size: fontSize.xs,
+            font: "duster",
+            width: 44
+        }),
+        pos(3, newCard.is("propups") && data.affects == "curve" ? 66 : 70),
+        color(Color.fromHex(dark))
+    ])
+}
+
 
     return newCard
 }

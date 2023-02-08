@@ -18,7 +18,7 @@ export const createConsequence = () => {
 
     const newCard = add([
         "card",
-        "hasInfoText",
+       // "hasInfoText",
         "consequences",
         {kind: "consequences"},
         "discard",
