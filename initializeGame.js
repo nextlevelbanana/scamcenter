@@ -27,7 +27,7 @@ export const initializeGame = async() => {
     const deck = []
 
     selectedCards.forEach(card => {
-        const newCardObj = createCard(card, "deck")
+        const newCardObj = createCard({...card}, "deck")
         newCardObj.hidden = true
         deck.push(newCardObj)
     })

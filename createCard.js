@@ -147,7 +147,6 @@ export const createCard = (data, status) => {
         ])
     }
 
-    console.log(data.description)
     if (data.description) {
     newCard.add([
         "description",

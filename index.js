@@ -85,6 +85,7 @@ let loseMusic;
 //-----------------------------------------------------------------------
 
 scene("game", async () => {
+    console.log("Hello, fellow cheater! I don't think the console is going to give you any useful knowledge, but thanks for stopping by!")
     if (titleMusicIntro) {
         titleMusicIntro.paused = true
     }
@@ -236,12 +237,17 @@ scene("game", async () => {
     ])
 
     const checkForGameOver = () => {
-        console.log("checking for game over")
+        console.log("checking for game over, round" + roundNumber)
         if (bankBalance < 0) {
             mainMusicLoop.paused = true
            go("lose")
         } else {
-            roundNumber++
+            if (roundNumber == 4) {
+                if (mainMusicLoop) {
+                    mainMusicLoop.paused = true
+                }
+                go("win")
+            }
         }
     }
 
@@ -279,7 +285,7 @@ scene("game", async () => {
     const showNotification = () => {
         notifBox.hidden = false
         notifBox.get("closeNotif")[0].hidden = false
-
+        console.log("round number? ", roundNumber)
         notifBox.get("notifText")[0].text = notifs[roundNumber]
     }
 
@@ -352,7 +358,6 @@ scene("game", async () => {
     }
 
     const onPropUp = (propup, grift) => {
-        console.log("propping up")
         propup.whichGrift = grift.id //needed for crumble cleanup
         switch (propup.affects) {
             case "suckers":
@@ -360,12 +365,12 @@ scene("game", async () => {
                 addMeeples(grift, propup.value)
                 break;
             case "curve": 
-                grift.griftPhase = Math.min(0, grift.griftPhase - propup.value)
+                grift.griftPhase = Math.max(-1, grift.griftPhase - propup.value -1)
             break;
         }
     }
 
-    onClick("propuppable", thing => {
+    onClick("propuppable", (thing) => {
         const selectedGrift = thing.parent
         const selectedPropup = get("active")[0]
         selectedPropup.pos = vec2(selectedGrift.pos.x + (rand(64)-8), selectedGrift.pos.y - (rand(64)-8))
@@ -504,13 +509,15 @@ scene("game", async () => {
         }
     }
 
-   
-    turn.onStateEnter("suckersMove", () => {
+    turn.onStateEnter("suckersMove", async () => {
         console.log("suckers movin")
 
         advanceGrifts()
 
-        activeGrifts().forEach(grift => {
+        for await (const grift of activeGrifts()) { //attempt to avoid the next state starting before this is all resolved
+            if (grift.griftPhase == -1) {
+                grift.griftPhase = 0
+            }
             const deltaSuckers = grift.curve[grift.griftPhase]
             grift.suckers += Number(deltaSuckers)
             if (grift.suckers < 0) {
@@ -526,8 +533,7 @@ scene("game", async () => {
             } else {
                 addMeeples(grift, deltaSuckers)
             }
-
-       })
+       }
 
        turn.enterState("moneyMoves")
     })
@@ -581,7 +587,6 @@ scene("game", async () => {
     })
 
     turn.onStateEnd("moneyMoves", () => {
-        console.log("end moneymove")
         activeFrauds().forEach(fraud => {
             fraud.unuse("inPlay")
             fraud.use("discard")
@@ -645,8 +650,7 @@ scene("game", async () => {
         discardUIText.text = `${get("discard").length}`
         deckUIText.text = `${get("deck").length}`
     })
-
-});
+})
 
 
 //-----------------------------------------------------------------
@@ -751,6 +755,79 @@ scene("lose", async () => {
 
     notifBox.add([
         sprite("ceo"),
+        pos(240,96),
+        scale(0.5)
+    ])
+
+    await wait(2)
+    
+    const restartButton = add([
+            text("restart", {
+                size: fontSize.med,
+                font: "duster"
+            }),
+            opacity(1),
+            fadeIn(.6),
+            pos(32, 280),
+            area(),
+            z(150),
+            scale(1),
+            color(Color.fromHex(green))
+        ])
+    restartButton.onClick(() => {
+        destroyAll("*")
+        go("title")
+    })
+    const creditsButton = add([
+        text("credits", {
+            size: fontSize.med,
+            font: "duster"
+        }),
+        opacity(1),
+        fadeIn(.6),
+        pos(132,280),
+        area(),
+        z(150),
+        scale(1),
+        color(Color.fromHex(green))
+
+    ])
+    creditsButton.onClick(() => {
+        destroyAll("*")
+        go("credits")
+    })
+})
+
+scene("win", async () => {
+    loadSprite("ceo-wink", "./assets/sprites/ceo-wink.png")
+
+    play("scratch").then(() => play("titleBGMLoop", {loop: true}))
+
+    const notifBox = add([
+        "notifBox",
+        sprite("ui_default", {
+            width: 300,
+            height: 150
+        }),
+        pos(20,10),
+        z(100),
+        scale(2)
+    ])
+
+    notifBox.add([
+        "notifText",
+        text("WE REGRET TO INFORM YOU THAT SCAMCENTER IS RETIRING TO SPEND MORE TIME WITH ITS FAMILY.\n\nYOUR MEMBERSHIP HAS BEEN CANCELED.\n\nTHANK YOU FOR USING SCAMCENTER.", {
+            width: width()*.8,
+            size: fontSize.med,
+            font: "duster"
+        }),
+        color(Color.fromHex(black)),
+        pos(8,8),
+        scale(0.5)
+    ])
+
+    notifBox.add([
+        sprite("ceo-wink"),
         pos(240,96),
         scale(0.5)
     ])
